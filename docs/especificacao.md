@@ -4,6 +4,7 @@
 **Tipo de vila (sorteio):** Chocolataria  
 **Fluxo do sorteio:** cacau → chocolate; torrefação, moagem e vitrine; o lote perde o ponto se não for moldado a tempo.
 
+> Este documento deve ser o primeiro commit do repositório, antes do código.
 
 ## 1. Ideia do jogo
 

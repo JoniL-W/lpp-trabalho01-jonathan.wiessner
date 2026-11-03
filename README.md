@@ -1,7 +1,6 @@
 # Cacau Dourado — Vila da Chocolateria
 
-Trabalho 01 — Programação Orientada a Eventos.
+## Etapa 2 — conexão e estado sincronizado
 
-A especificação da vila está em docs/especificacao.md. 
-
+A tela abre, Mestre/Jogador conectam e o servidor envia `estado.sincronizado`.
 
