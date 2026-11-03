@@ -1,6 +1,7 @@
 # Cacau Dourado — Vila da Chocolateria
 
-## Etapa 2 — conexão e estado sincronizado
+## Etapa 3 — personagem controlável e multiplayer
 
-A tela abre, Mestre/Jogador conectam e o servidor envia `estado.sincronizado`.
+WASD/setas movimentam o personagem e a posição é sincronizada entre abas por eventos.
+
 
