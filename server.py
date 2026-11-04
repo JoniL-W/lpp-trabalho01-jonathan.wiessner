@@ -16,6 +16,7 @@ ESTACOES = {
     "moagem": (590, 175),
     "moldagem": (840, 190),
     "vitrine": (1010, 500),
+    "praca": (590, 390),
     "lote1": (475, 500),
     "lote2": (735, 500),
     "lote3": (1090, 165),
@@ -27,6 +28,18 @@ RAIO_INTERACAO = 92
 CUSTO_CONSTRUCAO = 45
 TEMPO_OBRA = 9
 GANHO_PRODUCAO = 3
+CUSTO_MELHORIA = 55
+LIMITE_MAX_TRABALHADORES = 4
+CUSTO_FESTIVAL = 45
+BONUS_FESTIVAL_REPUTACAO = 2
+BONUS_FESTIVAL_PRODUCAO = 2
+META_MOEDAS = 160
+META_REPUTACAO = 7
+CACAU_DOURADO_BONUS = 18
+CACAU_DOURADO_PRAZO = 11
+PONTOS_CACAU_DOURADO = [
+    (270, 350), (430, 315), (750, 325), (925, 350), (285, 535), (900, 535)
+]
 
 
 def novo_lote():
@@ -43,7 +56,9 @@ estado = {
     "vitrine_premium": 0,
     "vitrine_comuns": 0,
     "moedas": 0,
+    "moedas_ganhas": 0,
     "reputacao": 0,
+    "meta_atingida": False,
     "producao": 10,
     "intervalo": 6,
     "lote_atual": None,
@@ -58,12 +73,15 @@ estado = {
     "em_obra": 0,
     "concluidas": 0,
     "expansoes": {lote: novo_lote() for lote in LOTES},
+    "cacau_dourado": None,
 }
 
 jogadores = {}
 contador_lote = 0
 contador_pedido = 0
 indice_pedido = 0
+contador_cacau_dourado = 0
+indice_cacau_dourado = 0
 
 CATALOGO = [
     {"cliente": "Dona Clara", "produto": "Caixa de bombons", "quantidade": 6, "recompensa": 26},
@@ -91,6 +109,26 @@ def perto(sid, estacao):
 
 def total_vitrine():
     return estado["vitrine_premium"] + estado["vitrine_comuns"]
+
+
+async def verificar_meta(causa):
+    """Emite a meta uma unica vez quando moedas ganhas e reputacao atingem o objetivo."""
+    if estado["meta_atingida"]:
+        return
+    if estado["moedas_ganhas"] >= META_MOEDAS and estado["reputacao"] >= META_REPUTACAO:
+        estado["meta_atingida"] = True
+        await sio.emit(
+            "meta.atingida",
+            fato(causa, meta_moedas=META_MOEDAS, meta_reputacao=META_REPUTACAO),
+        )
+
+
+def perto_cacau_dourado(sid):
+    jogador = jogadores.get(sid)
+    bonus = estado.get("cacau_dourado")
+    if not jogador or not bonus:
+        return False
+    return math.hypot(jogador["x"] - bonus["x"], jogador["y"] - bonus["y"]) <= 72
 
 
 async def recusar(sid, motivo, causa):
@@ -170,6 +208,7 @@ async def abrir_vila(sid, dados=None):
     estado["fase"] = "aberta"
     sio.start_background_task(producao_cacau)
     sio.start_background_task(gerar_pedidos)
+    sio.start_background_task(gerar_cacau_dourado)
     # FATO para todos: a partir daqui temporizadores e acoes de jogo ficam liberados.
     await sio.emit("vila.iniciada", fato(pedido, por=jogador["nome"]))
 
@@ -193,7 +232,136 @@ async def encerrar_vila(sid, dados=None):
     estado["pedido_ativo"] = None
     estado["lote_atual"] = None
     estado["massa_cacau"] = 0
+    estado["cacau_dourado"] = None
     await sio.emit("vila.encerrada", fato(pedido, por=jogador["nome"]))
+
+
+@sio.on("melhoria.solicitada")
+async def contratar_chocolateiro(sid, dados=None):
+    pedido = "melhoria.solicitada"
+    jogador = jogadores.get(sid)
+    if not jogador or jogador["papel"] != "mestre":
+        await recusar(sid, "Somente o Mestre pode contratar chocolateiros", pedido)
+        return
+    if estado["fase"] != "aberta":
+        await recusar(sid, "A temporada nao esta aberta", pedido)
+        return
+    if not perto(sid, "prefeitura"):
+        await recusar(sid, "Chegue perto da Prefeitura", pedido)
+        return
+    if estado["limite_trabalhadores"] >= LIMITE_MAX_TRABALHADORES:
+        await recusar(sid, "A vila ja possui o limite maximo de chocolateiros", pedido)
+        return
+    if estado["moedas"] < CUSTO_MELHORIA:
+        await recusar(sid, f"Sao necessarias {CUSTO_MELHORIA} moedas para contratar", pedido)
+        return
+
+    estado["moedas"] -= CUSTO_MELHORIA
+    estado["limite_trabalhadores"] += 1
+    # FATO para todos: o limite compartilhado de trabalhadores aumentou.
+    await sio.emit(
+        "melhoria.realizada",
+        fato(pedido, por=jogador["nome"], custo=CUSTO_MELHORIA, novo_limite=estado["limite_trabalhadores"]),
+    )
+
+
+@sio.on("festival.solicitado")
+async def realizar_festival(sid, dados=None):
+    pedido = "festival.solicitado"
+    jogador = jogadores.get(sid)
+    if not jogador or jogador["papel"] != "mestre":
+        await recusar(sid, "Somente o Mestre pode realizar o Festival", pedido)
+        return
+    if estado["fase"] != "aberta":
+        await recusar(sid, "A temporada nao esta aberta", pedido)
+        return
+    if not perto(sid, "praca"):
+        await recusar(sid, "Va ate a Praca Central para realizar o Festival", pedido)
+        return
+    if estado["moedas"] < CUSTO_FESTIVAL:
+        await recusar(sid, f"O Festival custa {CUSTO_FESTIVAL} moedas", pedido)
+        return
+
+    estado["moedas"] -= CUSTO_FESTIVAL
+    estado["reputacao"] += BONUS_FESTIVAL_REPUTACAO
+    estado["producao"] += BONUS_FESTIVAL_PRODUCAO
+    await sio.emit(
+        "festival.realizado",
+        fato(
+            pedido,
+            por=jogador["nome"],
+            custo=CUSTO_FESTIVAL,
+            reputacao=BONUS_FESTIVAL_REPUTACAO,
+            ganho_producao=BONUS_FESTIVAL_PRODUCAO,
+        ),
+    )
+    await verificar_meta("festival.realizado")
+
+
+async def gerar_cacau_dourado():
+    global contador_cacau_dourado, indice_cacau_dourado
+    await sio.sleep(11)
+    while estado["fase"] == "aberta":
+        if estado.get("cacau_dourado") is None:
+            contador_cacau_dourado += 1
+            x, y = PONTOS_CACAU_DOURADO[indice_cacau_dourado % len(PONTOS_CACAU_DOURADO)]
+            indice_cacau_dourado += 1
+            expira = time.time() + CACAU_DOURADO_PRAZO
+            bonus = {
+                "id": contador_cacau_dourado,
+                "x": x,
+                "y": y,
+                "expira_em": expira,
+                "prazo": CACAU_DOURADO_PRAZO,
+            }
+            estado["cacau_dourado"] = bonus
+            await sio.emit(
+                "cacau_dourado.apareceu",
+                fato("temporizador_cacau_dourado", cacau_dourado=copy.deepcopy(bonus)),
+            )
+            sio.start_background_task(expirar_cacau_dourado, bonus["id"], expira)
+        await sio.sleep(18)
+
+
+async def expirar_cacau_dourado(bonus_id, expira):
+    await sio.sleep(max(0, expira - time.time()))
+    bonus = estado.get("cacau_dourado")
+    if estado["fase"] != "aberta" or not bonus or bonus.get("id") != bonus_id:
+        return
+    estado["cacau_dourado"] = None
+    await sio.emit(
+        "cacau_dourado.expirado",
+        fato("temporizador_cacau_dourado", bonus_id=bonus_id),
+    )
+
+
+@sio.on("cacau_dourado.coleta_solicitada")
+async def coletar_cacau_dourado(sid, dados=None):
+    pedido = "cacau_dourado.coleta_solicitada"
+    jogador = jogadores.get(sid)
+    bonus = estado.get("cacau_dourado")
+    if not jogador or jogador["papel"] != "jogador":
+        await recusar(sid, "Somente Jogadores coletam o Cacau Dourado", pedido)
+        return
+    if estado["fase"] != "aberta":
+        await recusar(sid, "A temporada nao esta aberta", pedido)
+        return
+    if not bonus:
+        await recusar(sid, "O Cacau Dourado nao esta mais disponivel", pedido)
+        return
+    if not perto_cacau_dourado(sid):
+        await recusar(sid, "Aproxime-se do Cacau Dourado", pedido)
+        return
+
+    coletado = copy.deepcopy(bonus)
+    estado["cacau_dourado"] = None
+    estado["cacau"] += CACAU_DOURADO_BONUS
+    estado["reputacao"] += 1
+    await sio.emit(
+        "cacau_dourado.coletado",
+        fato(pedido, por=jogador["nome"], bonus=CACAU_DOURADO_BONUS, cacau_dourado=coletado),
+    )
+    await verificar_meta("cacau_dourado.coletado")
 
 
 async def producao_cacau():
@@ -514,6 +682,7 @@ async def entregar_pedido(sid, dados=None):
     tudo_premium = premium_usadas == quantidade
     recompensa = pedido["recompensa"] + (pedido["bonus_premium"] if tudo_premium else 0)
     estado["moedas"] += recompensa
+    estado["moedas_ganhas"] += recompensa
     estado["reputacao"] += 2 if tudo_premium else 1
     estado["pedidos_entregues"] += 1
     atendido = copy.deepcopy(pedido)
@@ -529,3 +698,4 @@ async def entregar_pedido(sid, dados=None):
             recompensa_final=recompensa,
         ),
     )
+    await verificar_meta("pedido.entregue")

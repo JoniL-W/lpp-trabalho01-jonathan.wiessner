@@ -36,7 +36,7 @@
     .panel{min-width:0;background:linear-gradient(180deg,#30211b,#261a16);border:1px solid #563d32;border-radius:13px;padding:9px 10px;overflow:hidden}
     .panel-title{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:7px}.panel h2{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:#e9c98e;margin:0}.tiny{font-size:9px;color:#a89382}
     .stats-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px}.stat{background:#1d1512;border:1px solid #49342b;border-radius:9px;padding:6px;min-width:0}.stat small{display:block;font-size:8px;color:#a99584;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.stat strong{display:block;margin-top:1px;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.stat.emphasis{border-color:#77593a;background:#251a13}.stat.good{border-color:#426344;background:#172019}
-    .phase-line{margin-top:5px;display:flex;align-items:center;justify-content:space-between;gap:6px;font-size:9px;color:#c9b8a8}.phase-badge{padding:3px 6px;border-radius:999px;background:#172019;border:1px solid #38523a;color:#bfe4b8;font-weight:800}
+    .phase-line{margin-top:5px;display:flex;align-items:center;justify-content:space-between;gap:6px;font-size:9px;color:#c9b8a8}.phase-badge{padding:3px 6px;border-radius:999px;background:#172019;border:1px solid #38523a;color:#bfe4b8;font-weight:800}.phase-badge.goal{border-color:#8b6b35;background:#2a2113;color:#f5d888}.goal-line{margin-top:4px;display:flex;align-items:center;justify-content:space-between;gap:6px;font-size:8px;color:#b7a493}.goal-line b{color:#f0d29a}
 
     .mission{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center}.mission-main{min-width:0}.mission-label{font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:#c9ad7c}.mission-text{font-size:12px;font-weight:900;color:#fff;margin-top:2px;line-height:1.2}.mission-sub{font-size:9px;color:#b9a696;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.mission-icon{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;background:#1c1512;border:1px solid #5a4033;font-size:24px}.alert-box{margin-top:7px;border-radius:9px;padding:6px 8px;font-size:9px;line-height:1.3;background:#3b1c17;border:1px solid #7f4339;color:#ffc0b6}
     .timer-row{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:7px}.timer-card{background:#1c1512;border:1px solid #4c362c;border-radius:9px;padding:6px}.timer-head{display:flex;justify-content:space-between;gap:6px;font-size:8px;color:#b9a696}.timer-head b{font-size:11px;color:#ffe0a4}.meter{height:5px;margin-top:4px;border-radius:999px;background:#0f0b09;overflow:hidden}.meter span{display:block;height:100%;background:linear-gradient(90deg,#df9a48,#f1cf76);transition:width .18s linear}.meter.green span{background:linear-gradient(90deg,#5e9758,#a5cd79)}.timer-card.danger{border-color:#8a493f}.timer-card.danger .timer-head b{color:#ff9b8d}
@@ -85,9 +85,10 @@
           <span class="control-chip"><b>WASD</b> mover</span>
           <span class="control-chip"><b>SHIFT</b> correr</span>
           <span class="control-chip"><b>E</b> interagir</span>
+          <span v-if="papel==='mestre'" class="control-chip"><b>Q</b> encerrar</span>
         </div>
         <div id="jogo"></div>
-        <div class="developer-float">Desenvolvido por Jonathan Wiessner • LPP 2026/2</div>
+        <div class="developer-float">Desenvolvido por Jonathan Wiessner (@JoniL-W) • LPP 2026/2</div>
       </section>
 
       <aside class="sidebar">
@@ -106,6 +107,7 @@
             <div class="stat"><small>Expansoes</small><strong>&#127968; {{estado.concluidas}}/3</strong></div>
           </div>
           <div class="phase-line"><span>Temporada compartilhada</span><span class="phase-badge">{{estado.fase}}</span></div>
+          <div class="goal-line"><span>Meta: <b>{{estado.moedas_ganhas||0}}/160</b> moedas • <b>{{estado.reputacao}}/7</b> rep.</span><span class="phase-badge goal">{{estado.meta_atingida?'META ✓':(estado.cacau_dourado?'✨ ' + segDourado + 's':'em progresso')}}</span></div>
         </section>
 
         <section class="panel">
@@ -154,7 +156,7 @@
           <div class="events">
             <div v-if="!eventos.length" class="empty">Os eventos emitidos e escutados aparecem aqui.</div>
             <div v-for="(e,i) in eventos" :key="i" class="event" :class="{emit:e.sentido==='enviado',reject:e.nome==='operacao.recusada'}">
-              <div class="event-top"><strong>{{e.nome}}</strong><span class="dir">{{e.sentido==='enviado'?'emit ->':'<- on'}}</span></div>
+              <div class="event-top"><strong>{{e.nome}}</strong><span class="dir">{{e.hora}} • {{e.sentido==='enviado'?'emit ->':'<- on'}}</span></div>
               <div class="event-meta" v-if="e.causa">causa: {{e.causa}}</div>
               <div class="event-meta" v-if="e.dados">dados: {{e.dados}}</div>
               <div class="event-meta" v-if="e.reacao">reacao: {{e.reacao}}</div>
@@ -179,6 +181,7 @@ function criarJogo2D(hooks){
     moagem:{x:590,y:175,nome:'Moagem',icone:'\u2699'},
     moldagem:{x:840,y:190,nome:'Moldagem',icone:'\uD83C\uDF6B'},
     vitrine:{x:1010,y:500,nome:'Vitrine',icone:'\uD83D\uDED2'},
+    praca:{x:590,y:390,nome:'Praca do Festival',icone:'\uD83C\uDF89'},
     lote1:{x:475,y:500,nome:'Lote 1',icone:'\uD83C\uDFD7'},
     lote2:{x:735,y:500,nome:'Lote 2',icone:'\uD83C\uDFD7'},
     lote3:{x:1090,y:165,nome:'Lote 3',icone:'\uD83C\uDFD7'}
@@ -195,8 +198,8 @@ function criarJogo2D(hooks){
       this.desenharEstacoes();
       this.criarPrompt();
       this.criarSetaObjetivo();
-      this.keys=this.input.keyboard.addKeys('W,A,S,D,E,SHIFT,UP,DOWN,LEFT,RIGHT');
-      this.input.keyboard.addCapture(['W','A','S','D','UP','DOWN','LEFT','RIGHT','E','SHIFT']);
+      this.keys=this.input.keyboard.addKeys('W,A,S,D,E,Q,SHIFT,UP,DOWN,LEFT,RIGHT');
+      this.input.keyboard.addCapture(['W','A','S','D','UP','DOWN','LEFT','RIGHT','E','Q','SHIFT']);
     }
 
     criarTexturasPersonagem(){
@@ -269,7 +272,7 @@ function criarJogo2D(hooks){
     desenharEstacoes(){
       this.predioPrefeitura(EST.prefeitura.x,EST.prefeitura.y);this.predioTorrefacao(EST.torrefacao.x,EST.torrefacao.y);this.predioMoagem(EST.moagem.x,EST.moagem.y);this.predioMoldagem(EST.moldagem.x,EST.moldagem.y);this.predioVitrine(EST.vitrine.x,EST.vitrine.y);
       this.desenharLotes();
-      Object.entries(EST).forEach(([id,e])=>{const ring=this.add.ellipse(e.x,e.y+24,160,82).setStrokeStyle(3,0xffdc88,.55).setFillStyle(0xffdf7a,.04).setDepth(8).setVisible(false);e.ring=ring;this.tweens.add({targets:ring,alpha:{from:.3,to:.9},scaleX:{from:.96,to:1.04},scaleY:{from:.96,to:1.04},duration:780,yoyo:true,repeat:-1});this.add.text(e.x,e.y-108,e.icone+' '+e.nome.toUpperCase(),{fontSize:'12px',fontStyle:'bold',color:'#fff9ed',backgroundColor:'#2a1b16e8',padding:{x:8,y:5}}).setOrigin(.5).setDepth(30)})
+      Object.entries(EST).forEach(([id,e])=>{const ring=this.add.ellipse(e.x,e.y+24,160,82).setStrokeStyle(3,0xffdc88,.55).setFillStyle(0xffdf7a,.04).setDepth(8).setVisible(false);e.ring=ring;this.tweens.add({targets:ring,alpha:{from:.3,to:.9},scaleX:{from:.96,to:1.04},scaleY:{from:.96,to:1.04},duration:780,yoyo:true,repeat:-1});if(id!=='praca')this.add.text(e.x,e.y-108,e.icone+' '+e.nome.toUpperCase(),{fontSize:'12px',fontStyle:'bold',color:'#fff9ed',backgroundColor:'#2a1b16e8',padding:{x:8,y:5}}).setOrigin(.5).setDepth(30)})
     }
     basePredio(x,y,w,h,wall,roof){const g=this.add.graphics().setDepth(12);g.fillStyle(0x000000,.20).fillEllipse(x,y+45,w*.95,26);g.fillStyle(wall).fillRoundedRect(x-w/2,y-h/2,w,h,10);g.lineStyle(3,0x51372e).strokeRoundedRect(x-w/2,y-h/2,w,h,10);g.fillStyle(roof).fillTriangle(x-w*.6,y-h/2+2,x+w*.6,y-h/2+2,x,y-h/2-54);g.lineStyle(3,0x51372e).strokeTriangle(x-w*.6,y-h/2+2,x+w*.6,y-h/2+2,x,y-h/2-54);g.fillStyle(0xffffff,.09).fillTriangle(x-w*.53,y-h/2,x,y-h/2-46,x-w*.1,y-h/2);this.obstaculos.push({x,y:y-3,w:w*.9,h:h*.9});return g}
     janela(g,x,y,w=24,h=21){g.fillStyle(0x78afc5).fillRoundedRect(x-w/2,y-h/2,w,h,4);g.fillStyle(0xcceaf0,.32).fillRoundedRect(x-w/2+3,y-h/2+3,w-6,6,2);g.lineStyle(2,0x5b4338).strokeRoundedRect(x-w/2,y-h/2,w,h,4);g.lineBetween(x,y-h/2,x,y+h/2)}
@@ -302,7 +305,7 @@ function criarJogo2D(hooks){
     criarPrompt(){this.prompt=this.add.container(W/2,H-31).setDepth(120);const bg=this.add.graphics();bg.fillStyle(0x1d1411,.92).fillRoundedRect(-210,-19,420,38,12);bg.lineStyle(1,0xf0c873,.55).strokeRoundedRect(-210,-19,420,38,12);this.promptTexto=this.add.text(0,0,'Explore a vila - WASD / SHIFT',{fontFamily:'Segoe UI, sans-serif',fontSize:'14px',fontStyle:'bold',color:'#fff7e8'}).setOrigin(.5);this.prompt.add([bg,this.promptTexto]);this.prompt.setScrollFactor(0)}
     criarSetaObjetivo(){this.seta=this.add.container(0,0).setDepth(100);const t=this.add.triangle(0,0,0,0,18,0,9,14,0xffd15e,1).setStrokeStyle(2,0x5f3d25);const glow=this.add.circle(9,-4,18,0xffd15e,.10);this.seta.add([glow,t]);this.seta.setVisible(false);this.tweens.add({targets:this.seta,y:'+=8',duration:650,yoyo:true,repeat:-1,ease:'Sine.easeInOut'})}
 
-    avatar(sid,j){if(this.avatares[sid])return this.avatares[sid];const c=this.add.container(j.x,j.y).setDepth(70);const shadow=this.add.ellipse(0,18,30,10,0x000000,.22);const sprite=this.add.image(0,-10,(j.papel==='mestre'?'master':'chef')+'-down-0').setOrigin(.5,.5).setScale(1.18);const name=this.add.text(0,34,j.nome,{fontSize:'10px',fontStyle:'bold',color:'#fff',backgroundColor:'#271912dd',padding:{x:5,y:2}}).setOrigin(.5);c.add([shadow,sprite,name]);c.sprite=sprite;c.role=j.papel==='mestre'?'master':'chef';c.direction='down';c.step=0;c.alvoX=j.x;c.alvoY=j.y;c.lastX=j.x;c.lastY=j.y;this.avatares[sid]=c;return c}
+    avatar(sid,j){if(this.avatares[sid])return this.avatares[sid];const c=this.add.container(j.x,j.y).setDepth(70);const shadow=this.add.ellipse(0,18,30,10,0x000000,.22);const sprite=this.add.image(0,-10,(j.papel==='mestre'?'master':'chef')+'-down-0').setOrigin(.5,.5).setScale(1.18);const name=this.add.text(0,34,j.nome,{fontSize:'10px',fontStyle:'bold',color:'#fff',backgroundColor:'#271912dd',padding:{x:5,y:2}}).setOrigin(.5);c.add([shadow,sprite,name]);c.sprite=sprite;c.role=j.papel==='mestre'?'master':'chef';c.direction='down';c.step=0;c.alvoX=j.x;c.alvoY=j.y;c.lastX=j.x;c.lastY=j.y;c._lastStep=0;this.avatares[sid]=c;return c}
     habilitarFisicaLocal(){const c=this.avatares[this.meuSid];if(!c||c.body)return;this.physics.add.existing(c);c.body.setCollideWorldBounds(true);c.body.setSize(24,18);c.body.setOffset(-12,-2);this.obstaculos.forEach(o=>{const z=this.add.zone(o.x,o.y,o.w,o.h);this.physics.add.existing(z,true);this.physics.add.collider(c,z)})}
     sync(me,jogadores){this.meuSid=me;Object.entries(jogadores).forEach(([sid,j])=>{const c=this.avatar(sid,j);c.setPosition(j.x,j.y);c.alvoX=j.x;c.alvoY=j.y});this.habilitarFisicaLocal()}
     entrou(sid,j){this.avatar(sid,j)}
@@ -312,21 +315,43 @@ function criarJogo2D(hooks){
     flutuar(texto,x,y,cor='#fff6dd'){const t=this.add.text(x,y,texto,{fontSize:'15px',fontStyle:'bold',color:cor,stroke:'#3a241b',strokeThickness:4}).setOrigin(.5).setDepth(130);this.tweens.add({targets:t,y:y-46,alpha:0,duration:1450,ease:'Sine.easeOut',onComplete:()=>t.destroy()})}
     piscarEstacao(id){const e=EST[id];if(e)this.tweens.add({targets:e.ring,scaleX:1.2,scaleY:1.2,alpha:1,duration:170,yoyo:true,repeat:2})}
     mostrarCliente(pedido){if(this.cliente){this.cliente.destroy(true);this.cliente=null}if(!pedido)return;const c=this.add.container(1092,450).setDepth(75);const sh=this.add.ellipse(0,29,34,10,0x000000,.2);const body=this.add.rectangle(0,8,26,34,0x6a7fa8).setStrokeStyle(2,0x33405a);const head=this.add.circle(0,-17,12,0xe1b38d).setStrokeStyle(2,0x4b3024);const hair=this.add.arc(0,-22,11,185,355,false,0x493127);const bubble=this.add.graphics();bubble.fillStyle(0xfff7e9,.98).fillRoundedRect(-108,-80,104,46,10);bubble.lineStyle(2,0x65483b).strokeRoundedRect(-108,-80,104,46,10);bubble.fillTriangle(-10,-48,4,-42,-12,-35);const txt=this.add.text(-56,-57,pedido.quantidade+' barras',{fontSize:'11px',fontStyle:'bold',color:'#3b271e'}).setOrigin(.5);const nome=this.add.text(0,43,pedido.cliente,{fontSize:'9px',fontStyle:'bold',color:'#fff',backgroundColor:'#261912dd',padding:{x:4,y:2}}).setOrigin(.5);c.add([sh,body,head,hair,bubble,txt,nome]);this.cliente=c;this.tweens.add({targets:c,y:c.y-5,duration:850,yoyo:true,repeat:-1,ease:'Sine.easeInOut'})}
+    mostrarCacauDourado(bonus){
+      if(this.cacauDourado){this.cacauDourado.destroy(true);this.cacauDourado=null}
+      if(!bonus)return;
+      const c=this.add.container(bonus.x,bonus.y).setDepth(96);const glow=this.add.circle(0,0,30,0xffd65c,.16);const g=this.add.graphics();
+      g.fillStyle(0x6f4b24).fillEllipse(0,4,20,30);g.fillStyle(0xffcf42).fillEllipse(0,0,16,26);g.lineStyle(2,0x7d5520).strokeEllipse(0,0,16,26);g.lineStyle(2,0xffeb8c).lineBetween(0,-11,0,11);g.fillStyle(0x4b8a45).fillEllipse(-8,-14,10,6).fillEllipse(8,-14,10,6);
+      const star=this.add.text(0,-28,'✦',{fontSize:'18px',fontStyle:'bold',color:'#fff2a8'}).setOrigin(.5);const label=this.add.text(0,31,'CACAU DOURADO',{fontSize:'8px',fontStyle:'bold',color:'#3a2815',backgroundColor:'#ffe675e8',padding:{x:5,y:3}}).setOrigin(.5);c.add([glow,g,star,label]);
+      this.tweens.add({targets:glow,scale:{from:.8,to:1.35},alpha:{from:.08,to:.28},duration:650,yoyo:true,repeat:-1});this.tweens.add({targets:c,y:c.y-6,duration:750,yoyo:true,repeat:-1,ease:'Sine.easeInOut'});this.cacauDourado=c;
+    }
+    removerCacauDourado(){if(this.cacauDourado){const c=this.cacauDourado;this.cacauDourado=null;this.tweens.add({targets:c,alpha:0,scale:.7,duration:220,onComplete:()=>c.destroy(true)})}}
     removerCliente(){if(this.cliente){const c=this.cliente;this.cliente=null;this.tweens.add({targets:c,alpha:0,x:1130,duration:320,onComplete:()=>c.destroy(true)})}}
-    objetivoAtual(ctx){if(ctx.estado.fase==='aguardando')return ctx.papel==='mestre'?'prefeitura':null;if(ctx.papel==='mestre')return null;if(ctx.estado.fase==='encerrada')return null;if((ctx.estado.concluidas||0)===0&&(ctx.estado.em_obra||0)===0&&(ctx.estado.cacau||0)>=(ctx.estado.custo_construcao||45)){const livre=Object.entries(ctx.estado.expansoes||{}).find(([,v])=>v.status==='livre');if(livre)return livre[0]}const prontas=(ctx.estado.barras_premium||0)+(ctx.estado.barras_comuns||0);const total=(ctx.estado.vitrine_premium||0)+(ctx.estado.vitrine_comuns||0);if(ctx.estado.pedido_ativo&&total>=ctx.estado.pedido_ativo.quantidade)return'vitrine';if(prontas>0)return'vitrine';if(ctx.estado.lote_atual||ctx.estado.massa_cacau>0)return'moldagem';if(ctx.estado.cacau_torrado>=10)return'moagem';return'torrefacao'}
+    objetivoAtual(ctx){if(ctx.estado.fase==='aguardando')return ctx.papel==='mestre'?'prefeitura':null;if(ctx.estado.fase==='encerrada')return null;if(ctx.papel==='mestre')return ctx.estado.moedas>=45?'praca':null;if(ctx.estado.lote_atual||ctx.estado.massa_cacau>0)return'moldagem';if(ctx.estado.cacau_dourado)return'cacau_dourado';if((ctx.estado.concluidas||0)===0&&(ctx.estado.em_obra||0)===0&&(ctx.estado.cacau||0)>=(ctx.estado.custo_construcao||45)){const livre=Object.entries(ctx.estado.expansoes||{}).find(([,v])=>v.status==='livre');if(livre)return livre[0]}const prontas=(ctx.estado.barras_premium||0)+(ctx.estado.barras_comuns||0);const total=(ctx.estado.vitrine_premium||0)+(ctx.estado.vitrine_comuns||0);if(ctx.estado.pedido_ativo&&total>=ctx.estado.pedido_ativo.quantidade)return'vitrine';if(prontas>0)return'vitrine';if(ctx.estado.cacau_torrado>=10)return'moagem';return'torrefacao'}
 
-    update(t){const c=this.avatares[this.meuSid];if(!c||!c.body)return;const k=this.keys;let dx=0,dy=0;if(k.A.isDown||k.LEFT.isDown)dx--;if(k.D.isDown||k.RIGHT.isDown)dx++;if(k.W.isDown||k.UP.isDown)dy--;if(k.S.isDown||k.DOWN.isDown)dy++;const moving=!!(dx||dy);const sprint=k.SHIFT.isDown;const speed=sprint?690:470;if(moving){const len=Math.hypot(dx,dy);c.body.setVelocity(dx/len*speed,dy/len*speed)}else c.body.setVelocity(0,0);this.animarAvatar(c,dx,dy,t,moving);c.setDepth(70+c.y/1000);
-      if(moving&&t-this.ultimoEnvio>45){this.ultimoEnvio=t;hooks.move(c.x,c.y)}
+    update(t){
+      const c=this.avatares[this.meuSid];if(!c||!c.body)return;const k=this.keys;let dx=0,dy=0;
+      if(k.A.isDown||k.LEFT.isDown)dx--;if(k.D.isDown||k.RIGHT.isDown)dx++;if(k.W.isDown||k.UP.isDown)dy--;if(k.S.isDown||k.DOWN.isDown)dy++;
+      const moving=!!(dx||dy),sprint=k.SHIFT.isDown,speed=sprint?690:470;if(moving){const len=Math.hypot(dx,dy);c.body.setVelocity(dx/len*speed,dy/len*speed)}else c.body.setVelocity(0,0);
+      this.animarAvatar(c,dx,dy,t,moving);c.setDepth(70+c.y/1000);if(moving&&t-this.ultimoEnvio>45){this.ultimoEnvio=t;hooks.move(c.x,c.y)}
       Object.entries(this.avatares).forEach(([sid,av])=>{if(sid===this.meuSid)return;const ox=av.x,oy=av.y;av.x=Phaser.Math.Linear(av.x,av.alvoX,.22);av.y=Phaser.Math.Linear(av.y,av.alvoY,.22);this.animarAvatar(av,av.x-ox,av.y-oy,t,Math.abs(av.x-ox)+Math.abs(av.y-oy)>.15);av.setDepth(70+av.y/1000)});
-      let nearest=null,dist=9999;Object.entries(EST).forEach(([id,e])=>{const d=Phaser.Math.Distance.Between(c.x,c.y,e.x,e.y);e.ring.setVisible(d<125);if(d<dist){dist=d;nearest=id}});this.perto=dist<92?nearest:null;hooks.near(this.perto);
-      const ctx=hooks.ctx();const target=this.objetivoAtual(ctx);if(target&&EST[target]){this.seta.setVisible(true);this.seta.x=EST[target].x-9;this.seta.y=EST[target].y-132}else this.seta.setVisible(false);
-      let texto=sprint?'Correndo - solte SHIFT para andar':'WASD mover - SHIFT correr - E interagir';if(this.perto){if(ctx.papel==='mestre'&&this.perto==='prefeitura'){texto=ctx.estado.fase==='aguardando'?'[E] Abrir temporada':ctx.estado.fase==='aberta'?'[E] Encerrar temporada':'Temporada encerrada'}else if(ctx.papel==='jogador'){const ready=(ctx.estado.barras_premium||0)+(ctx.estado.barras_comuns||0);const map={torrefacao:'[E] Torrar 12 cacaus',moagem:'[E] Moer cacau torrado',moldagem:'[E] Moldar chocolate'};if(this.perto.startsWith('lote')){const info=(ctx.estado.expansoes||{})[this.perto];if(!info||info.status==='livre')texto='[E] Construir expansao ('+(ctx.estado.custo_construcao||45)+' cacaus)';else if(info.status==='em_obra')texto='Obra em andamento - chocolateiro ocupado';else texto='Expansao concluida • +3 producao'}else if(this.perto==='vitrine'){if(ready>0)texto='[E] Abastecer a vitrine';else if(ctx.estado.pedido_ativo)texto='[E] Entregar pedido';else texto='Vitrine aguardando producao';}else texto=map[this.perto]||'Area do Mestre'}else texto='Esta estacao e usada pelos Jogadores'}this.promptTexto.setText(texto);if(Phaser.Input.Keyboard.JustDown(k.E)&&this.perto)hooks.action(this.perto)}
+      const ctx=hooks.ctx();let nearest=null,dist=9999;Object.entries(EST).forEach(([id,e])=>{const d=Phaser.Math.Distance.Between(c.x,c.y,e.x,e.y);e.ring.setVisible(d<125);if(d<dist){dist=d;nearest=id}});
+      this.perto=dist<92?nearest:null;const bonus=ctx.estado.cacau_dourado;if(ctx.papel==='jogador'&&bonus&&Phaser.Math.Distance.Between(c.x,c.y,bonus.x,bonus.y)<72)this.perto='cacau_dourado';hooks.near(this.perto);
+      const target=this.objetivoAtual(ctx);if(target==='cacau_dourado'&&bonus){this.seta.setVisible(true);this.seta.x=bonus.x-9;this.seta.y=bonus.y-58}else if(target&&EST[target]){this.seta.setVisible(true);this.seta.x=EST[target].x-9;this.seta.y=EST[target].y-132}else this.seta.setVisible(false);
+      let texto=sprint?'Correndo - solte SHIFT para andar':'WASD mover - SHIFT correr - E interagir';
+      if(this.perto==='cacau_dourado')texto='[E] Coletar Cacau Dourado (+18 cacaus / +1 reputacao)';
+      else if(this.perto){
+        if(ctx.papel==='mestre'&&this.perto==='prefeitura')texto=ctx.estado.fase==='aguardando'?'[E] Abrir temporada':ctx.estado.fase==='aberta'?'[E] Contratar chocolateiro (55 moedas) • [Q] Encerrar':'Temporada encerrada';
+        else if(ctx.papel==='mestre'&&this.perto==='praca'&&ctx.estado.fase==='aberta')texto='[E] Festival do Chocolate (45 moedas)';
+        else if(ctx.papel==='jogador'){const ready=(ctx.estado.barras_premium||0)+(ctx.estado.barras_comuns||0);const map={torrefacao:'[E] Torrar 12 cacaus',moagem:'[E] Moer cacau torrado',moldagem:'[E] Moldar chocolate'};if(this.perto.startsWith('lote')){const info=(ctx.estado.expansoes||{})[this.perto];if(!info||info.status==='livre')texto='[E] Construir expansao ('+(ctx.estado.custo_construcao||45)+' cacaus)';else if(info.status==='em_obra')texto='Obra em andamento - chocolateiro ocupado';else texto='Expansao concluida • +3 producao'}else if(this.perto==='vitrine'){if(ready>0)texto='[E] Abastecer a vitrine';else if(ctx.estado.pedido_ativo)texto='[E] Entregar pedido';else texto='Vitrine aguardando producao'}else texto=map[this.perto]||'Area do Mestre';
+        }else texto='Esta area e usada pelo outro papel';
+      }
+      this.promptTexto.setText(texto);if(Phaser.Input.Keyboard.JustDown(k.E)&&this.perto)hooks.action(this.perto);if(Phaser.Input.Keyboard.JustDown(k.Q)&&ctx.papel==='mestre'&&this.perto==='prefeitura'&&ctx.estado.fase==='aberta')hooks.secondary('prefeitura');
+    }
   }
 
   return{
     start(id){game=new Phaser.Game({type:Phaser.AUTO,parent:id,width:W,height:H,backgroundColor:'#87b968',scene:Vila,audio:{noAudio:true},render:{antialias:true,pixelArt:false},physics:{default:'arcade',arcade:{gravity:{y:0},debug:false}},scale:{mode:Phaser.Scale.FIT,autoCenter:Phaser.Scale.CENTER_BOTH}})},
     sync:(...a)=>cena&&cena.sync(...a),entrou:(...a)=>cena&&cena.entrou(...a),saiu:(...a)=>cena&&cena.saiu(...a),remoto:(...a)=>cena&&cena.remoto(...a),
-    flutuar:(...a)=>cena&&cena.flutuar(...a),piscar:(...a)=>cena&&cena.piscarEstacao(...a),pedido:p=>cena&&cena.mostrarCliente(p),removerCliente:()=>cena&&cena.removerCliente(),
+    flutuar:(...a)=>cena&&cena.flutuar(...a),piscar:(...a)=>cena&&cena.piscarEstacao(...a),pedido:p=>cena&&cena.mostrarCliente(p),removerCliente:()=>cena&&cena.removerCliente(),cacauDourado:b=>cena&&cena.mostrarCacauDourado(b),removerCacauDourado:()=>cena&&cena.removerCacauDourado(),
     expansoes:e=>cena&&cena.atualizarExpansoes(e),posLote:id=>cena&&cena.posLote(id)
   };
 }
@@ -335,22 +360,28 @@ const {createApp,ref,reactive,computed,nextTick}=Vue;
 createApp({
   setup(){
     const nome=ref(''),papel=ref(''),conectado=ref(false),eventos=ref([]),ultimoErro=ref(''),estacaoPerto=ref(null),agora=ref(Date.now());const contadores=reactive({});
-    const estado=reactive({fase:'aguardando',cacau:0,cacau_torrado:0,massa_cacau:0,barras_premium:0,barras_comuns:0,vitrine_premium:0,vitrine_comuns:0,moedas:0,reputacao:0,producao:10,intervalo:6,lote_atual:null,pedido_ativo:null,pedidos_entregues:0,pedidos_perdidos:0,trabalhadores:0,limite_trabalhadores:2,custo_construcao:45,tempo_obra:9,em_obra:0,concluidas:0,expansoes:{}});
+    const estado=reactive({fase:'aguardando',cacau:0,cacau_torrado:0,massa_cacau:0,barras_premium:0,barras_comuns:0,vitrine_premium:0,vitrine_comuns:0,moedas:0,moedas_ganhas:0,reputacao:0,meta_atingida:false,producao:10,intervalo:6,lote_atual:null,pedido_ativo:null,pedidos_entregues:0,pedidos_perdidos:0,trabalhadores:0,limite_trabalhadores:2,custo_construcao:45,tempo_obra:9,em_obra:0,concluidas:0,expansoes:{},cacau_dourado:null});
     setInterval(()=>agora.value=Date.now(),200);let socket;
     function dadosVisiveis(d){if(!d)return'';const limpo={};Object.entries(d).forEach(([k,v])=>{if(['estado','causa','jogadores','meu_sid'].includes(k))return;limpo[k]=v});const txt=JSON.stringify(limpo);return txt==='{}'?'':txt.slice(0,170)}
-    function registrar(sentido,nomeEvento,dados,reacao){contadores[nomeEvento]=(contadores[nomeEvento]||0)+1;eventos.value.unshift({sentido,nome:nomeEvento,causa:dados&&dados.causa,dados:dadosVisiveis(dados),reacao});eventos.value=eventos.value.slice(0,80)}
+    function registrar(sentido,nomeEvento,dados,reacao){contadores[nomeEvento]=(contadores[nomeEvento]||0)+1;const hora=new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit',second:'2-digit'});eventos.value.unshift({sentido,nome:nomeEvento,hora,causa:dados&&dados.causa,dados:dadosVisiveis(dados),reacao});eventos.value=eventos.value.slice(0,80)}
+    // pedir(...) centraliza os PEDIDOS: registra o emit no painel e so depois envia ao servidor.
     function pedir(nomeEvento,dados={}){ultimoErro.value='';registrar('enviado',nomeEvento,dados,'pedido enviado ao servidor');socket.emit(nomeEvento,dados)}
+    // ouvir(...) centraliza os FATOS: registra horario, causa, dados e reacao antes de atualizar a interface.
     function ouvir(nomeEvento,reacao,fn){socket.on(nomeEvento,d=>{registrar('recebido',nomeEvento,d,reacao);if(d.estado)Object.assign(estado,d.estado);if(fn)fn(d)})}
     const jogo=criarJogo2D({
+      // Movimento e telemetria de alta frequencia; fica fora da lista detalhada para nao ocultar os eventos didaticos.
       move:(x,y)=>socket&&socket.emit('jogador.movimentou',{x,y}),near:id=>estacaoPerto.value=id,ctx:()=>({papel:papel.value,estado}),
-      action:id=>{if(papel.value==='mestre'&&id==='prefeitura'){if(estado.fase==='aguardando')pedir('vila.abertura_solicitada');else if(estado.fase==='aberta')pedir('vila.encerramento_solicitado')}if(papel.value==='jogador'){const map={torrefacao:'lote.torrefacao_solicitada',moagem:'lote.moagem_solicitada',moldagem:'lote.moldagem_solicitada'};if(id.startsWith('lote'))pedir('construcao.solicitada',{lote:id});else if(id==='vitrine'){const prontas=(estado.barras_premium||0)+(estado.barras_comuns||0);if(prontas>0)pedir('lote.vitrine_solicitada');else pedir('pedido.entrega_solicitada')}else if(map[id])pedir(map[id])}}
+      secondary:id=>{if(papel.value==='mestre'&&id==='prefeitura')pedir('vila.encerramento_solicitado')},
+      action:id=>{if(papel.value==='mestre'){if(id==='prefeitura'){if(estado.fase==='aguardando')pedir('vila.abertura_solicitada');else if(estado.fase==='aberta')pedir('melhoria.solicitada')}else if(id==='praca'&&estado.fase==='aberta')pedir('festival.solicitado')}if(papel.value==='jogador'){if(id==='cacau_dourado'){pedir('cacau_dourado.coleta_solicitada');return}const map={torrefacao:'lote.torrefacao_solicitada',moagem:'lote.moagem_solicitada',moldagem:'lote.moldagem_solicitada'};if(id.startsWith('lote'))pedir('construcao.solicitada',{lote:id});else if(id==='vitrine'){const prontas=(estado.barras_premium||0)+(estado.barras_comuns||0);if(prontas>0)pedir('lote.vitrine_solicitada');else pedir('pedido.entrega_solicitada')}else if(map[id])pedir(map[id])}}
     });
     function entrar(p){papel.value=p;socket=io({auth:{nome:nome.value||'Anonimo',papel:p}});socket.on('connect',()=>{conectado.value=true;nextTick(()=>jogo.start('jogo'))});
-      ouvir('estado.sincronizado','desenha estado, expansoes e jogadores',d=>setTimeout(()=>{jogo.sync(d.meu_sid,d.jogadores);jogo.pedido(d.estado.pedido_ativo);jogo.expansoes(d.estado)},80));
-      ouvir('jogador.entrou','desenha novo personagem',d=>jogo.entrou(d.sid,d.jogador));ouvir('jogador.saiu','remove personagem',d=>jogo.saiu(d.sid));socket.on('jogador.posicao_atualizada',d=>jogo.remoto(d.sid,d.x,d.y));
+      ouvir('estado.sincronizado','desenha estado, expansoes e jogadores',d=>setTimeout(()=>{jogo.sync(d.meu_sid,d.jogadores);jogo.pedido(d.estado.pedido_ativo);jogo.expansoes(d.estado);jogo.cacauDourado(d.estado.cacau_dourado)},80));
+      ouvir('jogador.entrou','desenha novo personagem',d=>jogo.entrou(d.sid,d.jogador));ouvir('jogador.saiu','remove personagem',d=>jogo.saiu(d.sid));
+      // Posicoes chegam em alta frequencia e sao interpoladas no Phaser; nao entram no historico detalhado para manter o painel legivel.
+      socket.on('jogador.posicao_atualizada',d=>jogo.remoto(d.sid,d.x,d.y));
       // ESCUTAS: cada fato do servidor produz uma reacao visual e fica registrado no painel.
       ouvir('vila.iniciada','abre temporada para todos',d=>{jogo.flutuar('TEMPORADA ABERTA',590,335,'#fff0a8');jogo.piscar('prefeitura')});
-      ouvir('vila.encerrada','encerra temporada e bloqueia novas acoes',d=>{jogo.flutuar('TEMPORADA ENCERRADA',590,335,'#c9d8ff');jogo.removerCliente();jogo.piscar('prefeitura')});
+      ouvir('vila.encerrada','encerra temporada e bloqueia novas acoes',d=>{jogo.flutuar('TEMPORADA ENCERRADA',590,335,'#c9d8ff');jogo.removerCliente();jogo.removerCacauDourado();jogo.piscar('prefeitura')});
       ouvir('construcao.iniciada','transforma lote em canteiro de obras',d=>{jogo.expansoes(d.estado);const p=jogo.posLote(d.lote);if(p){jogo.flutuar('OBRA INICIADA • -'+d.custo+' CACAU',p.x,p.y-65,'#ffe0a0');jogo.piscar(d.lote)}});
       ouvir('construcao.concluida','transforma canteiro em anexo e libera trabalhador',d=>{jogo.expansoes(d.estado);const p=jogo.posLote(d.lote);if(p){jogo.flutuar('EXPANSAO PRONTA • +'+d.ganho_producao+' PRODUCAO',p.x,p.y-70,'#d9ffc6');jogo.piscar(d.lote)}});
       ouvir('recurso.produzido','atualiza cacau automatico',d=>jogo.flutuar('+'+d.quantidade+' CACAU',130,270,'#efffa9'));
@@ -362,16 +393,22 @@ createApp({
       ouvir('pedido_cliente.gerado','desenha cliente',d=>{jogo.pedido(d.pedido);jogo.flutuar('NOVO CLIENTE',1010,430,'#dfffc9')});
       ouvir('pedido.entregue','entrega pedido',d=>{jogo.flutuar('+'+d.recompensa_final+' MOEDAS',1010,430,'#fff0a8');jogo.removerCliente()});
       ouvir('pedido.expirado','cliente desistiu',d=>{jogo.flutuar('CLIENTE FOI EMBORA',1010,430,'#ff9f8e');jogo.removerCliente()});
+      ouvir('cacau_dourado.apareceu','desenha bonus raro no mapa',d=>{jogo.cacauDourado(d.cacau_dourado);jogo.flutuar('CACAU DOURADO APARECEU!',590,350,'#fff0a8')});
+      ouvir('cacau_dourado.coletado','remove bonus e aplica recompensa',d=>{jogo.removerCacauDourado();jogo.flutuar('+'+d.bonus+' CACAU • +1 REPUTACAO',590,350,'#fff0a8')});
+      ouvir('cacau_dourado.expirado','remove bonus que nao foi coletado',d=>jogo.removerCacauDourado());
+      ouvir('melhoria.realizada','aumenta limite de chocolateiros',d=>{jogo.flutuar('NOVO CHOCOLATEIRO • LIMITE '+d.novo_limite,165,430,'#d9ffc6');jogo.piscar('prefeitura')});
+      ouvir('festival.realizado','celebra festival e melhora a vila',d=>{jogo.flutuar('FESTIVAL! +'+d.reputacao+' REP • +'+d.ganho_producao+' PRODUCAO',590,340,'#ffe49a');jogo.piscar('praca')});
+      ouvir('meta.atingida','mostra a meta final da temporada',d=>jogo.flutuar('META DA TEMPORADA ATINGIDA!',590,300,'#fff2a8'));
       ouvir('operacao.recusada','mostra recusa so para quem pediu',d=>{ultimoErro.value=d.motivo;setTimeout(()=>{if(ultimoErro.value===d.motivo)ultimoErro.value=''},3300)});
     }
     const totalVitrine=computed(()=>(estado.vitrine_premium||0)+(estado.vitrine_comuns||0));
-    const segLote=computed(()=>estado.lote_atual?Math.max(0,Math.ceil(estado.lote_atual.expira_em-agora.value/1000)):0);const segPedido=computed(()=>estado.pedido_ativo?Math.max(0,Math.ceil(estado.pedido_ativo.expira_em-agora.value/1000)):0);
+    const segLote=computed(()=>estado.lote_atual?Math.max(0,Math.ceil(estado.lote_atual.expira_em-agora.value/1000)):0);const segPedido=computed(()=>estado.pedido_ativo?Math.max(0,Math.ceil(estado.pedido_ativo.expira_em-agora.value/1000)):0);const segDourado=computed(()=>estado.cacau_dourado?Math.max(0,Math.ceil(estado.cacau_dourado.expira_em-agora.value/1000)):0);
     const percentualLote=computed(()=>estado.lote_atual?Math.max(0,Math.min(100,(segLote.value/(estado.lote_atual.prazo||14))*100)):0);const percentualPedido=computed(()=>estado.pedido_ativo?Math.max(0,Math.min(100,(segPedido.value/(estado.pedido_ativo.prazo||30))*100)):0);
     const progresso=computed(()=>{if((estado.barras_premium||0)+(estado.barras_comuns||0)>0||totalVitrine.value>0)return 4;if(estado.lote_atual||estado.massa_cacau>0)return 3;if(estado.cacau_torrado>=10)return 2;return 1});function etapaClasse(n){return{active:progresso.value===n,done:n<progresso.value||(n===4&&totalVitrine.value>0)}}
-    const objetivoTitulo=computed(()=>{if(estado.fase==='aguardando')return papel.value==='mestre'?'Abra a temporada':'Aguarde o Mestre';if(estado.fase==='encerrada')return'Temporada encerrada';if(papel.value==='mestre')return'Administre ou encerre na Prefeitura';if((estado.concluidas||0)===0&&(estado.em_obra||0)===0&&(estado.cacau||0)>=(estado.custo_construcao||45))return'Construa a primeira expansao';const prontas=(estado.barras_premium||0)+(estado.barras_comuns||0);if(estado.pedido_ativo&&totalVitrine.value>=estado.pedido_ativo.quantidade)return'Entregue o pedido';if(prontas>0)return'Leve para a Vitrine';if(estado.lote_atual)return estado.lote_atual.status==='no_ponto'?'Corra para a Moldagem':'Molde o lote';if(estado.cacau_torrado>=10)return'Va para a Moagem';return'Comece na Torrefacao'});
-    const objetivoIcone=computed(()=>{const t=objetivoTitulo.value;if(t.includes('temporada')||t.includes('Mestre'))return'\uD83C\uDFDB';if(t.includes('Moldagem')||t.includes('Molde'))return'\uD83C\uDF6B';if(t.includes('Moagem'))return'\u2699';if(t.includes('Vitrine')||t.includes('pedido'))return'\uD83D\uDED2';if(t.includes('expansao'))return'\uD83C\uDFD7';if(t.includes('Torrefacao'))return'\uD83D\uDD25';return'\uD83C\uDF6B'});
-    const dicaAtual=computed(()=>{if(estado.fase==='aguardando')return papel.value==='mestre'?'Va ate a Prefeitura e pressione E.':'O Mestre precisa iniciar a temporada.';if(estado.fase==='encerrada')return'Producao parada e novas acoes bloqueadas pelo servidor.';if(papel.value==='mestre')return'Na Prefeitura, pressione E para encerrar quando finalizar os testes.';if((estado.concluidas||0)===0&&(estado.em_obra||0)===0&&(estado.cacau||0)>=(estado.custo_construcao||45))return'Va ate um lote marcado com construcao e pressione E.';if(estado.lote_atual&&estado.lote_atual.status==='no_ponto')return'Use SHIFT para correr antes do tempo acabar.';if(estado.pedido_ativo)return estado.pedido_ativo.cliente+' quer '+estado.pedido_ativo.quantidade+' barras.';if(estacaoPerto.value)return'Pressione E para interagir com a estacao.';return'Siga a seta dourada no mapa.'});
-    return{nome,papel,conectado,estado,eventos,contadores,ultimoErro,estacaoPerto,entrar,totalVitrine,segLote,segPedido,percentualLote,percentualPedido,etapaClasse,objetivoTitulo,objetivoIcone,dicaAtual};
+    const objetivoTitulo=computed(()=>{if(estado.meta_atingida)return'Meta da temporada atingida!';if(estado.fase==='aguardando')return papel.value==='mestre'?'Abra a temporada':'Aguarde o Mestre';if(estado.fase==='encerrada')return'Temporada encerrada';if(papel.value==='mestre')return estado.moedas>=45?'Festival ou melhoria da vila':'Ajude a vila a ganhar moedas';if(estado.lote_atual)return estado.lote_atual.status==='no_ponto'?'Corra para a Moldagem':'Molde o lote';if(estado.cacau_dourado)return'Colete o Cacau Dourado!';if((estado.concluidas||0)===0&&(estado.em_obra||0)===0&&(estado.cacau||0)>=(estado.custo_construcao||45))return'Construa a primeira expansao';const prontas=(estado.barras_premium||0)+(estado.barras_comuns||0);if(estado.pedido_ativo&&totalVitrine.value>=estado.pedido_ativo.quantidade)return'Entregue o pedido';if(prontas>0)return'Leve para a Vitrine';if(estado.cacau_torrado>=10)return'Va para a Moagem';return'Comece na Torrefacao'});
+    const objetivoIcone=computed(()=>{const t=objetivoTitulo.value;if(t.includes('Meta'))return'🏆';if(t.includes('Dourado'))return'✨';if(t.includes('Festival')||t.includes('melhoria'))return'🎉';if(t.includes('temporada')||t.includes('Mestre'))return'\uD83C\uDFDB';if(t.includes('Moldagem')||t.includes('Molde'))return'\uD83C\uDF6B';if(t.includes('Moagem'))return'\u2699';if(t.includes('Vitrine')||t.includes('pedido'))return'\uD83D\uDED2';if(t.includes('expansao'))return'\uD83C\uDFD7';if(t.includes('Torrefacao'))return'\uD83D\uDD25';return'\uD83C\uDF6B'});
+    const dicaAtual=computed(()=>{if(estado.meta_atingida)return'Voce pode encerrar a temporada na Prefeitura com Q.';if(estado.fase==='aguardando')return papel.value==='mestre'?'Va ate a Prefeitura e pressione E.':'O Mestre precisa iniciar a temporada.';if(estado.fase==='encerrada')return'Producao parada e novas acoes bloqueadas pelo servidor.';if(papel.value==='mestre')return estado.moedas>=45?'Praca: E faz Festival. Prefeitura: E contrata e Q encerra.':'Jogadores precisam atender clientes para gerar moedas.';if(estado.lote_atual&&estado.lote_atual.status==='no_ponto')return'Use SHIFT para correr antes do tempo acabar.';if(estado.cacau_dourado)return'Bonus raro por poucos segundos: siga a seta e pressione E.';if((estado.concluidas||0)===0&&(estado.em_obra||0)===0&&(estado.cacau||0)>=(estado.custo_construcao||45))return'Va ate um lote marcado com construcao e pressione E.';if(estado.pedido_ativo)return estado.pedido_ativo.cliente+' quer '+estado.pedido_ativo.quantidade+' barras.';if(estacaoPerto.value)return'Pressione E para interagir com a estacao.';return'Siga a seta dourada no mapa.'});
+    return{nome,papel,conectado,estado,eventos,contadores,ultimoErro,estacaoPerto,entrar,totalVitrine,segLote,segPedido,segDourado,percentualLote,percentualPedido,etapaClasse,objetivoTitulo,objetivoIcone,dicaAtual};
   }
 }).mount('#app');
 </script>
