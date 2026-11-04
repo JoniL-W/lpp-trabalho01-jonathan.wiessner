@@ -1,11 +1,331 @@
-<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Cacau Dourado</title><style>
-body{margin:0;background:#201715;color:#f8ead7;font-family:system-ui}#app{max-width:1060px;margin:20px auto;padding:0 12px}.card{background:#30231f;border:1px solid #5d4439;border-radius:15px;padding:14px;margin:10px 0}input,button{font:inherit;padding:10px;border-radius:9px}input{width:100%;box-sizing:border-box;margin:8px 0;background:#18110f;border:1px solid #6d5145;color:#fff}button{border:0;font-weight:700;margin-right:8px;background:#d2a154;cursor:pointer}#jogo{overflow:hidden;border-radius:12px}#jogo canvas{width:100%!important;height:auto!important;display:block}.eventos{font:12px ui-monospace,monospace}.evento{border-left:4px solid #68a36c;background:#211815;padding:7px;margin:5px 0}
-</style></head><body><div id="app"><section v-if="!conectado" class="card"><h1>🍫 Cacau Dourado</h1><p>Etapa 3: personagem controlável e multiplayer visível.</p><input v-model="nome" placeholder="Seu nome"><button @click="entrar('mestre')">👑 Mestre</button><button @click="entrar('jogador')">🍫 Jogador</button></section><main v-else><h1>🍫 Vila da Chocolateria</h1><p>Use <strong>WASD ou setas</strong>. Abra outra aba para ver o outro personagem andando.</p><section class="card"><div id="jogo"></div></section><section class="card eventos"><h2>📡 Painel</h2><div v-for="e in eventos" class="evento">⬇ on <strong>{{e.nome}}</strong> · causa: {{e.causa}}<br>↪ {{e.reacao}}</div></section></main></div>
-<script src="https://unpkg.com/vue@3.5.13/dist/vue.global.js"></script><script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script><script src="https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.min.js"></script><script>
-function criarJogo(h){let game,scene;class S extends Phaser.Scene{constructor(){super('v')}create(){this.av={};this.me=null;this.last=0;const g=this.add.graphics();g.fillStyle(0x87b96d).fillRect(0,0,960,540);g.fillStyle(0xd8b57f).fillRoundedRect(50,290,860,60,25);g.fillRoundedRect(450,75,60,400,25);for(const [x,y,t] of [[210,150,'🔥 Torrefação'],[470,135,'⚙️ Moagem'],[700,155,'🍫 Moldagem'],[830,400,'🛒 Vitrine'],[120,410,'🏛️ Prefeitura']]){g.fillStyle(0x70432f).fillRoundedRect(x-42,y-28,84,60,7);g.fillStyle(0x4b2a20).fillTriangle(x-52,y-28,x+52,y-28,x,y-67);this.add.text(x,y-83,t,{fontSize:'14px',color:'#fff',backgroundColor:'#2b211dcc',padding:{x:5,y:3}}).setOrigin(.5)}this.keys=this.input.keyboard.addKeys('W,A,S,D,UP,DOWN,LEFT,RIGHT');scene=this}
-avatar(sid,j){if(this.av[sid])return this.av[sid];const c=this.add.container(j.x,j.y).setDepth(20);const sh=this.add.ellipse(0,16,24,9,0x000000,.2),body=this.add.rectangle(0,2,18,25,j.papel==='mestre'?0xe0b14f:0x8b5135).setStrokeStyle(2,0x3a241c),head=this.add.circle(0,-14,9,0xf0c8a0).setStrokeStyle(2,0x3a241c),name=this.add.text(0,29,j.nome,{fontSize:'11px',color:'#fff',backgroundColor:'#2b211dcc',padding:{x:4,y:2}}).setOrigin(.5),mark=this.add.text(0,-37,j.papel==='mestre'?'👑':'🍫',{fontSize:'14px'}).setOrigin(.5);c.add([sh,body,head,mark,name]);this.av[sid]=c;return c}
-sync(me,jogs){this.me=me;Object.entries(jogs).forEach(([sid,j])=>{const c=this.avatar(sid,j);c.setPosition(j.x,j.y)})}entrou(sid,j){this.avatar(sid,j)}saiu(sid){if(this.av[sid]){this.av[sid].destroy();delete this.av[sid]}}remoto(sid,x,y){if(this.av[sid]&&sid!==this.me)this.tweens.add({targets:this.av[sid],x,y,duration:90})}
-update(t){const c=this.av[this.me];if(!c)return;let dx=0,dy=0,k=this.keys;if(k.A.isDown||k.LEFT.isDown)dx--;if(k.D.isDown||k.RIGHT.isDown)dx++;if(k.W.isDown||k.UP.isDown)dy--;if(k.S.isDown||k.DOWN.isDown)dy++;if(dx||dy){const l=Math.hypot(dx,dy);c.x=Phaser.Math.Clamp(c.x+dx/l*2.7,28,932);c.y=Phaser.Math.Clamp(c.y+dy/l*2.7,68,510);if(t-this.last>80){this.last=t;h.move(c.x,c.y)}}}}
-return{start(id){game=new Phaser.Game({type:Phaser.AUTO,parent:id,width:960,height:540,scene:S,audio:{noAudio:true}})},sync:(...a)=>scene&&scene.sync(...a),entrou:(...a)=>scene&&scene.entrou(...a),saiu:(...a)=>scene&&scene.saiu(...a),remoto:(...a)=>scene&&scene.remoto(...a)}}
-const{createApp,ref,nextTick}=Vue;createApp({setup(){const nome=ref(''),conectado=ref(false),eventos=ref([]);let socket;const jogo=criarJogo({move:(x,y)=>socket&&socket.emit('jogador.movimentou',{x,y})});function add(n,d,r){eventos.value.unshift({nome:n,causa:d.causa,reacao:r});eventos.value=eventos.value.slice(0,20)}function entrar(p){socket=io({auth:{nome:nome.value||'Anônimo',papel:p}});socket.on('connect',()=>{conectado.value=true;nextTick(()=>jogo.start('jogo'))});socket.on('estado.sincronizado',d=>{add('estado.sincronizado',d,'desenha todos os jogadores');setTimeout(()=>jogo.sync(d.meu_sid,d.jogadores),50)});socket.on('jogador.entrou',d=>{add('jogador.entrou',d,'desenha o novo personagem');jogo.entrou(d.sid,d.jogador)});socket.on('jogador.saiu',d=>{add('jogador.saiu',d,'remove o personagem');jogo.saiu(d.sid)});socket.on('jogador.posicao_atualizada',d=>jogo.remoto(d.sid,d.x,d.y))}return{nome,conectado,eventos,entrar}}}).mount('#app');
-</script></body></html>
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Cacau Dourado — Vila da Chocolateria</title>
+  <style>
+    :root{
+      --bg:#17120f;--panel:#271c18;--panel2:#33241e;--line:#563c31;
+      --cream:#fff4df;--muted:#cbb9a7;--gold:#e7b45f;--green:#78a86b;
+      --red:#e77767;--blue:#76a9d8;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:linear-gradient(180deg,#17120f,#201713);color:var(--cream);font-family:Inter,Segoe UI,system-ui,sans-serif}
+    button,input{font:inherit}
+    #app{width:min(1580px,calc(100% - 24px));margin:12px auto}
+    .login{max-width:560px;margin:7vh auto;background:linear-gradient(180deg,#30211b,#241914);border:1px solid #614436;border-radius:22px;padding:28px;box-shadow:0 18px 55px #0006}
+    .login h1{font-size:32px;margin:0 0 4px}.login p{color:var(--muted);line-height:1.5}
+    .login input{width:100%;padding:13px 14px;margin:12px 0 16px;border-radius:12px;border:1px solid #6b4b3c;background:#17110f;color:#fff;outline:none}
+    .login input:focus{border-color:var(--gold);box-shadow:0 0 0 3px #e7b45f22}
+    .login-actions{display:flex;gap:10px;flex-wrap:wrap}
+    .btn{border:0;border-radius:11px;padding:12px 16px;font-weight:800;cursor:pointer;background:var(--gold);color:#2b1b12}.btn.secondary{background:#8b5a40;color:#fff}
+
+    .topbar{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:8px 4px 12px}
+    .brand h1{font-size:25px;margin:0}.brand p{margin:3px 0 0;color:var(--muted);font-size:13px}
+    .player-badge{background:#2e211c;border:1px solid #5a4035;border-radius:999px;padding:8px 12px;font-size:13px;color:#ead7c5;white-space:nowrap}
+
+    .game-layout{display:grid;grid-template-columns:minmax(0,3.25fr) minmax(290px,1fr);gap:14px;align-items:start}
+    .game-shell{background:#231914;border:1px solid #493229;border-radius:18px;padding:9px;overflow:hidden;box-shadow:0 12px 36px #0005}
+    #jogo{overflow:hidden;border-radius:13px;background:#7fa762;min-height:430px}
+    #jogo canvas{display:block;width:100%!important;height:auto!important;image-rendering:auto}
+
+    .sidebar{display:flex;flex-direction:column;gap:11px;min-width:0}
+    .panel{background:linear-gradient(180deg,#2d201b,#251a16);border:1px solid #50382e;border-radius:16px;padding:13px}
+    .panel h2{font-size:14px;text-transform:uppercase;letter-spacing:.09em;color:#e8c995;margin:0 0 10px}
+    .resources{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .resource{background:#1c1411;border:1px solid #463128;border-radius:11px;padding:9px 10px;min-width:0}
+    .resource small{display:block;color:#a99584;font-size:10px;text-transform:uppercase;letter-spacing:.08em}.resource strong{display:block;font-size:18px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .phase{margin-top:8px;padding:9px 10px;border-radius:10px;background:#172017;border:1px solid #37523a;color:#bfe5b7;font-size:12px}
+
+    .steps{display:flex;flex-direction:column;gap:7px}.step{display:grid;grid-template-columns:29px 1fr auto;gap:8px;align-items:center;padding:8px;border-radius:11px;border:1px solid #453129;background:#1d1512}.step.active{border-color:#b98746;background:#362718}.step.done{border-color:#38543a;background:#19231a}.num{height:29px;width:29px;border-radius:9px;background:#3a2922;display:grid;place-items:center;font-weight:900;color:#e6c691}.step strong{font-size:12px;display:block}.step small{font-size:10px;color:#a99584}.tag{font-size:9px;text-transform:uppercase;letter-spacing:.06em;padding:4px 6px;border-radius:999px;background:#3a2922;color:#ccb7a5}
+    .hint{padding:11px;border-radius:11px;background:#171311;border:1px solid #443027;color:#ecd8c2;font-size:12px;line-height:1.45}.hint b{color:#f5c773}.key{display:inline-grid;place-items:center;min-width:24px;height:23px;padding:0 6px;border-radius:6px;background:#efe2cf;color:#2b1b13;font-weight:900;box-shadow:inset 0 -2px 0 #b9a88f}
+    .error{padding:10px;border-radius:10px;background:#3a1915;border:1px solid #813d35;color:#ffb5aa;font-size:12px}
+
+    .events{max-height:260px;overflow:auto;padding-right:3px}.event{border-left:3px solid #71a874;background:#1b1411;padding:7px 8px;margin:6px 0;border-radius:0 8px 8px 0;font:10.5px ui-monospace,SFMono-Regular,Consolas,monospace;line-height:1.35;color:#d9c9bb}.event.emit{border-left-color:#6da8d5}.event.reject{border-left-color:#d66b5c}.event strong{color:#fff}.empty{color:#8f7c6d;font-size:12px}
+
+    .footer-tip{text-align:center;color:#8e7c6f;font-size:11px;margin:10px 0 3px}
+    @media(max-width:1050px){.game-layout{grid-template-columns:1fr}.sidebar{display:grid;grid-template-columns:1fr 1fr}.events-panel{grid-column:1/-1}}
+    @media(max-width:650px){#app{width:min(100% - 12px,1580px)}.topbar{align-items:flex-start;flex-direction:column}.sidebar{display:flex}.resources{grid-template-columns:1fr 1fr}.brand h1{font-size:21px}}
+  </style>
+</head>
+<body>
+<div id="app">
+  <section v-if="!conectado" class="login">
+    <h1>🍫 Cacau Dourado</h1>
+    <p><strong>Etapa 4:</strong> explore uma vila maior, caminhe até as estações e pressione <b>E</b> para produzir. As ações acontecem no mapa, não em botões.</p>
+    <input v-model.trim="nome" maxlength="24" placeholder="Digite seu nome">
+    <div class="login-actions">
+      <button class="btn" @click="entrar('jogador')">Entrar como Jogador</button>
+      <button class="btn secondary" @click="entrar('mestre')">Entrar como Mestre</button>
+    </div>
+  </section>
+
+  <main v-else>
+    <header class="topbar">
+      <div class="brand"><h1>Cacau Dourado — Vila da Chocolateria</h1><p>Explore, produza e abasteça a vitrine em tempo real.</p></div>
+      <div class="player-badge">{{ papel==='mestre'?'👑 Mestre':'🍫 Chocolatier' }} · {{ nome || 'Anônimo' }}</div>
+    </header>
+
+    <div class="game-layout">
+      <section class="game-shell"><div id="jogo"></div></section>
+
+      <aside class="sidebar">
+        <section class="panel">
+          <h2>Estoque da vila</h2>
+          <div class="resources">
+            <div class="resource"><small>Cacau cru</small><strong>🌰 {{estado.cacau}}</strong></div>
+            <div class="resource"><small>Cacau torrado</small><strong>🔥 {{estado.cacau_torrado}}</strong></div>
+            <div class="resource"><small>Massa</small><strong>🥣 {{estado.massa_cacau}}</strong></div>
+            <div class="resource"><small>Barras prontas</small><strong>🍫 {{estado.barras}}</strong></div>
+            <div class="resource"><small>Na vitrine</small><strong>🛍️ {{estado.vitrine_barras}}</strong></div>
+            <div class="resource"><small>Produção</small><strong>+{{estado.producao}} 🌰</strong></div>
+          </div>
+          <div class="phase">Temporada: <b>{{estado.fase}}</b></div>
+        </section>
+
+        <section class="panel">
+          <h2>Rota do chocolate</h2>
+          <div class="steps">
+            <div class="step" :class="etapaClasse(1)"><span class="num">1</span><div><strong>Torrefação</strong><small>12 cacaus → 10 torrados</small></div><span class="tag">🔥</span></div>
+            <div class="step" :class="etapaClasse(2)"><span class="num">2</span><div><strong>Moagem</strong><small>10 torrados → massa</small></div><span class="tag">⚙️</span></div>
+            <div class="step" :class="etapaClasse(3)"><span class="num">3</span><div><strong>Moldagem</strong><small>massa → 6 barras</small></div><span class="tag">🍫</span></div>
+            <div class="step" :class="etapaClasse(4)"><span class="num">4</span><div><strong>Vitrine</strong><small>exponha as barras prontas</small></div><span class="tag">🛍️</span></div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <h2>Como jogar</h2>
+          <div class="hint">
+            Mova com <span class="key">W</span><span class="key">A</span><span class="key">S</span><span class="key">D</span> ou setas.<br><br>
+            Quando chegar perto de uma estação, pressione <span class="key">E</span>.<br><br>
+            <b>{{ dicaAtual }}</b>
+          </div>
+          <div v-if="ultimoErro" class="error" style="margin-top:8px">✋ {{ultimoErro}}</div>
+        </section>
+
+        <section class="panel events-panel">
+          <h2>Painel de eventos</h2>
+          <div class="events">
+            <div v-if="!eventos.length" class="empty">Os eventos aparecerão aqui.</div>
+            <div v-for="(e,i) in eventos" :key="i" class="event" :class="[e.sentido==='enviado'?'emit':'',e.nome==='operacao.recusada'?'reject':'']">
+              {{e.sentido==='enviado'?'⬆ emit':'⬇ on'}} <strong>{{e.nome}}</strong><br>
+              causa: {{e.causa||'-'}} · reação: {{e.reacao}}
+            </div>
+          </div>
+        </section>
+      </aside>
+    </div>
+    <div class="footer-tip">Etapa 4 · mapa expandido + cadeia interativa · programação orientada a eventos</div>
+  </main>
+</div>
+
+<script src="https://unpkg.com/vue@3.5.13/dist/vue.global.js"></script>
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.min.js"></script>
+<script>
+function criarJogo2D(hooks){
+  let game, cena;
+  const W=1180,H=680;
+  const EST={
+    prefeitura:{x:165,y:525,nome:'Prefeitura',icone:'🏛️'},
+    torrefacao:{x:325,y:185,nome:'Torrefação',icone:'🔥'},
+    moagem:{x:590,y:175,nome:'Moagem',icone:'⚙️'},
+    moldagem:{x:840,y:190,nome:'Moldagem',icone:'🍫'},
+    vitrine:{x:1010,y:500,nome:'Vitrine',icone:'🛍️'}
+  };
+
+  class Vila extends Phaser.Scene{
+    constructor(){super('vila')}
+    create(){
+      cena=this;this.avatares={};this.meuSid=null;this.ultimoEnvio=0;this.perto=null;
+      this.desenharMapa();
+      this.desenharEstacoes();
+      this.prompt=this.add.container(W/2,H-31).setDepth(100);
+      const promptBg=this.add.graphics();promptBg.fillStyle(0x17110f,.9).fillRoundedRect(-170,-19,340,38,10);promptBg.lineStyle(1,0xe6bd7b,.45).strokeRoundedRect(-170,-19,340,38,10);
+      this.promptTexto=this.add.text(0,0,'Explore a vila',{fontFamily:'Segoe UI, sans-serif',fontSize:'15px',fontStyle:'bold',color:'#fff4df'}).setOrigin(.5);
+      this.prompt.add([promptBg,this.promptTexto]);
+      this.keys=this.input.keyboard.addKeys('W,A,S,D,E,UP,DOWN,LEFT,RIGHT');
+    }
+
+    desenharMapa(){
+      const g=this.add.graphics();
+      // Chao em tons variados para quebrar a aparencia de um retangulo vazio.
+      g.fillStyle(0x7faa68).fillRect(0,0,W,H);
+      for(let y=12;y<H;y+=42){for(let x=12;x<W;x+=42){const cor=((x+y)/42)%2<1?0x88b270:0x7ca564;g.fillStyle(cor,.24).fillRoundedRect(x,y,27,18,7)}}
+
+      // Rio e margens.
+      g.fillStyle(0x668f68).fillRoundedRect(0,570,W,110,0);
+      g.fillStyle(0x4d91b7).fillRoundedRect(350,580,640,100,22);
+      g.fillStyle(0x6eb1cf,.55).fillRoundedRect(370,592,600,14,7);
+      for(let x=390;x<950;x+=90){g.fillStyle(0x91c8df,.35).fillEllipse(x,632,45,6)}
+
+      // Caminhos principais.
+      g.lineStyle(72,0xc9a77c,1);g.beginPath();g.moveTo(90,390);g.lineTo(1080,390);g.strokePath();
+      g.lineStyle(54,0xd5b98d,1);g.beginPath();g.moveTo(165,390);g.lineTo(165,535);g.moveTo(325,390);g.lineTo(325,230);g.moveTo(590,390);g.lineTo(590,220);g.moveTo(840,390);g.lineTo(840,235);g.moveTo(1010,390);g.lineTo(1010,510);g.strokePath();
+      g.lineStyle(3,0xb18e65,.65);g.beginPath();g.moveTo(90,354);g.lineTo(1080,354);g.moveTo(90,426);g.lineTo(1080,426);g.strokePath();
+
+      // Ponte sobre o rio.
+      g.fillStyle(0x7b5133).fillRoundedRect(640,565,125,105,6);
+      for(let x=648;x<755;x+=18){g.fillStyle(0xb9814c).fillRect(x,568,12,98)}
+      g.lineStyle(4,0x5c3927).strokeRoundedRect(640,565,125,105,6);
+
+      // Pomar de cacau no canto superior esquerdo.
+      g.fillStyle(0x5e813f,.38).fillRoundedRect(40,45,180,220,20);
+      g.lineStyle(3,0x75583a,.7).strokeRoundedRect(40,45,180,220,20);
+      this.add.text(130,57,'POMAR DE CACAU',{fontSize:'11px',fontStyle:'bold',color:'#eef4d3',backgroundColor:'#35512ecc',padding:{x:7,y:4}}).setOrigin(.5).setDepth(5);
+      const arvores=[[78,104],[135,100],[190,110],[75,170],[137,165],[192,176],[82,231],[145,225]];
+      arvores.forEach(([x,y],i)=>this.arvoreCacau(x,y,i%3));
+
+      // Cercas.
+      this.cerca(g,35,280,205,280);this.cerca(g,1070,55,1145,55);this.cerca(g,1070,275,1145,275);
+
+      // Decoracao: arvores grandes, flores, caixas e postes.
+      [[1090,105],[1120,200],[65,345],[1110,470],[250,505],[930,525]].forEach(([x,y])=>this.arvoreDecorativa(x,y));
+      [[255,310],[520,320],[760,315],[940,320]].forEach(([x,y])=>this.poste(x,y));
+      [[470,90],[720,95],[1070,335],[275,560]].forEach(([x,y],i)=>this.flores(x,y,i));
+      this.caixas(255,244);this.caixas(898,248);
+
+      // Placas de orientacao.
+      this.placa(495,455,'← Produção');this.placa(890,455,'Vitrine →');
+    }
+
+    arvoreCacau(x,y,variante){
+      const g=this.add.graphics().setDepth(3);g.fillStyle(0x61412d).fillRoundedRect(x-5,y,10,30,4);g.fillStyle(variante===0?0x315f36:variante===1?0x3d7042:0x2e633a).fillCircle(x,y-8,25);g.fillStyle(0x4c7c42).fillCircle(x-15,y-4,15);g.fillCircle(x+14,y-5,15);
+      g.fillStyle(0xd4933d).fillEllipse(x-10,y+2,7,13);g.fillStyle(0xb96d32).fillEllipse(x+11,y+4,7,12);
+    }
+    arvoreDecorativa(x,y){const g=this.add.graphics().setDepth(4);g.fillStyle(0x5a3b29).fillRoundedRect(x-6,y,12,34,4);g.fillStyle(0x2e6237).fillCircle(x,y-13,31);g.fillStyle(0x397544).fillCircle(x-21,y-8,20);g.fillCircle(x+20,y-10,19);g.fillStyle(0x4c8750,.75).fillCircle(x-4,y-30,18)}
+    flores(x,y,v){const g=this.add.graphics().setDepth(2);const cores=[0xf4d06f,0xf0a6b8,0xe9efff];for(let i=0;i<8;i++){const a=i*Math.PI/4,dx=Math.cos(a)*18,dy=Math.sin(a)*10;g.fillStyle(cores[(i+v)%cores.length]).fillCircle(x+dx,y+dy,3);g.fillStyle(0x3d753f).fillCircle(x+dx-2,y+dy+5,3)}}
+    poste(x,y){const g=this.add.graphics().setDepth(6);g.fillStyle(0x49382f).fillRect(x-3,y,6,32);g.fillStyle(0x2d2521).fillRoundedRect(x-8,y-12,16,14,4);g.fillStyle(0xffdc83,.95).fillCircle(x,y-6,5)}
+    cerca(g,x1,y1,x2,y2){g.lineStyle(4,0x876443,1).lineBetween(x1,y1,x2,y2);for(let x=x1;x<=x2;x+=25){g.fillStyle(0x6d4d34).fillRoundedRect(x-3,y1-10,6,20,2)}}
+    caixas(x,y){const g=this.add.graphics().setDepth(8);g.fillStyle(0x8b5b32).fillRoundedRect(x,y,28,22,3);g.lineStyle(2,0x5e3b25).strokeRoundedRect(x,y,28,22,3);g.lineBetween(x+4,y+5,x+24,y+17);g.fillStyle(0xa66b37).fillRoundedRect(x+22,y-14,25,20,3);g.lineStyle(2,0x634028).strokeRoundedRect(x+22,y-14,25,20,3)}
+    placa(x,y,texto){const g=this.add.graphics().setDepth(7);g.fillStyle(0x6d472d).fillRoundedRect(x-45,y-14,90,28,5);g.fillStyle(0x53351f).fillRect(x-3,y+14,6,25);this.add.text(x,y,texto,{fontSize:'11px',fontStyle:'bold',color:'#f8e4c1'}).setOrigin(.5).setDepth(8)}
+
+    desenharEstacoes(){
+      this.predioPrefeitura(EST.prefeitura.x,EST.prefeitura.y);
+      this.predioTorrefacao(EST.torrefacao.x,EST.torrefacao.y);
+      this.predioMoagem(EST.moagem.x,EST.moagem.y);
+      this.predioMoldagem(EST.moldagem.x,EST.moldagem.y);
+      this.predioVitrine(EST.vitrine.x,EST.vitrine.y);
+      Object.entries(EST).forEach(([id,e])=>{
+        const ring=this.add.ellipse(e.x,e.y+24,150,75).setStrokeStyle(3,0xf2d083,.42).setDepth(9).setVisible(false);e.ring=ring;
+        this.tweens.add({targets:ring,alpha:{from:.3,to:.85},scaleX:{from:.94,to:1.04},scaleY:{from:.94,to:1.04},duration:800,yoyo:true,repeat:-1});
+        this.add.text(e.x,e.y-104,e.icone+' '+e.nome,{fontSize:'15px',fontStyle:'bold',color:'#fff7e8',backgroundColor:'#251914dd',padding:{x:8,y:5}}).setOrigin(.5).setDepth(20);
+      });
+    }
+    basePredio(x,y,w,h,parede,telhado){const g=this.add.graphics().setDepth(10);g.fillStyle(0x000000,.2).fillEllipse(x,y+42,w*.9,24);g.fillStyle(parede).fillRoundedRect(x-w/2,y-h/2,w,h,8);g.lineStyle(3,0x4b342b).strokeRoundedRect(x-w/2,y-h/2,w,h,8);g.fillStyle(telhado).fillTriangle(x-w*.58,y-h/2+2,x+w*.58,y-h/2+2,x,y-h/2-50);g.lineStyle(3,0x4b342b).strokeTriangle(x-w*.58,y-h/2+2,x+w*.58,y-h/2+2,x,y-h/2-50);return g}
+    predioPrefeitura(x,y){const g=this.basePredio(x,y,118,74,0xe8d5ad,0x9b5f3f);g.fillStyle(0x5c4435).fillRoundedRect(x-13,y-4,26,39,4);g.fillStyle(0x78a9c0).fillRoundedRect(x-44,y-11,22,20,3);g.fillRoundedRect(x+22,y-11,22,20,3);g.fillStyle(0xf1d58c).fillCircle(x,y-70,12);g.lineStyle(2,0x694731).strokeCircle(x,y-70,12);g.lineBetween(x,y-70,x,y-77);g.lineBetween(x,y-70,x+6,y-67)}
+    predioTorrefacao(x,y){const g=this.basePredio(x,y,138,78,0xb66c4f,0x6f3e2e);g.fillStyle(0x57392e).fillRoundedRect(x-20,y-3,40,38,5);g.fillStyle(0xf0a14d,.9).fillCircle(x,y+10,9);g.fillStyle(0x68483b).fillRect(x+40,y-83,24,67);g.fillStyle(0xd9c0a2).fillRect(x+43,y-91,18,9);this.add.circle(x+52,y-105,15,0xd7d0c9,.28).setDepth(9);this.add.circle(x+62,y-119,20,0xd7d0c9,.18).setDepth(9)}
+    predioMoagem(x,y){const g=this.basePredio(x,y,132,76,0xd6bd8d,0x75513a);g.fillStyle(0x5c4232).fillRoundedRect(x-16,y-3,32,38,4);g.fillStyle(0xa8c3c9).fillRoundedRect(x-50,y-10,25,22,3);const gear=this.add.graphics().setDepth(14);gear.lineStyle(7,0x6c6259).strokeCircle(x+40,y+2,24);for(let a=0;a<Math.PI*2;a+=Math.PI/4){gear.lineStyle(5,0x6c6259).lineBetween(x+40+Math.cos(a)*17,y+2+Math.sin(a)*17,x+40+Math.cos(a)*30,y+2+Math.sin(a)*30)}gear.fillStyle(0xb99a69).fillCircle(x+40,y+2,7)}
+    predioMoldagem(x,y){const g=this.basePredio(x,y,138,78,0xd9bda8,0x5c352b);g.fillStyle(0x70462f).fillRoundedRect(x-18,y-3,36,39,4);g.fillStyle(0xaed0d6).fillRoundedRect(x-54,y-15,27,25,3);g.fillStyle(0xaed0d6).fillRoundedRect(x+27,y-15,27,25,3);g.fillStyle(0x4a2b23).fillRoundedRect(x-44,y+17,88,10,4);for(let i=-32;i<=32;i+=16){g.fillStyle(i%32===0?0xf0dfca:0x8d4b3a).fillRoundedRect(x+i-7,y+17,14,10,2)}}
+    predioVitrine(x,y){const g=this.basePredio(x,y,150,82,0xf0d2b5,0x7f4338);g.fillStyle(0x75a8bd).fillRoundedRect(x-53,y-8,106,37,6);g.fillStyle(0xd8eef5,.35).fillRoundedRect(x-49,y-4,98,14,4);g.fillStyle(0x5b382b).fillRoundedRect(x+43,y-2,24,37,3);for(let i=-50;i<=50;i+=20){g.fillStyle(i%40===-10?0xf5e0bd:0xa95045).fillRect(x+i,y-44,20,13)}g.fillStyle(0x633829).fillRoundedRect(x-58,y+20,90,8,3);for(let i=0;i<5;i++){g.fillStyle(0x4e2b20).fillRoundedRect(x-45+i*17,y+11,12,7,2)}}
+
+    avatar(sid,j){
+      if(this.avatares[sid])return this.avatares[sid];
+      const c=this.add.container(j.x,j.y).setDepth(60);
+      const shadow=this.add.ellipse(0,17,28,10,0x000000,.2);
+      const leg1=this.add.rectangle(-5,10,7,14,0x342720).setStrokeStyle(1,0x211813);
+      const leg2=this.add.rectangle(5,10,7,14,0x342720).setStrokeStyle(1,0x211813);
+      const body=this.add.rectangle(0,-2,22,29,j.papel==='mestre'?0xd6a847:0x7c4b36).setStrokeStyle(2,0x3b271e);
+      const apron=j.papel==='mestre'?this.add.rectangle(0,1,0,0):this.add.rectangle(0,2,16,22,0xf2e1ca).setStrokeStyle(1,0x9b8066);
+      const head=this.add.circle(0,-23,11,0xe8bd98).setStrokeStyle(2,0x3b271e);
+      const hair=this.add.arc(0,-27,10,190,350,false,0x4a2e23).setStrokeStyle(0);
+      const hat=j.papel==='mestre'?this.add.text(0,-45,'👑',{fontSize:'17px'}).setOrigin(.5):this.add.graphics();
+      if(j.papel!=='mestre'){hat.fillStyle(0xf5e7d4).fillRoundedRect(-13,-41,26,8,4);hat.fillRoundedRect(-9,-49,18,10,5)}
+      const name=this.add.text(0,29,j.nome,{fontSize:'11px',fontStyle:'bold',color:'#fff',backgroundColor:'#261912dd',padding:{x:5,y:2}}).setOrigin(.5);
+      c.add([shadow,leg1,leg2,body,apron,head,hair,hat,name]);this.avatares[sid]=c;return c;
+    }
+    sync(me,jogadores){this.meuSid=me;Object.entries(jogadores).forEach(([sid,j])=>{const c=this.avatar(sid,j);c.setPosition(j.x,j.y)})}
+    entrou(sid,j){this.avatar(sid,j)}
+    saiu(sid){if(this.avatares[sid]){this.avatares[sid].destroy();delete this.avatares[sid]}}
+    remoto(sid,x,y){const c=this.avatares[sid];if(c&&sid!==this.meuSid)this.tweens.add({targets:c,x,y,duration:85,ease:'Linear'})}
+    flutuar(texto,x,y,cor='#fff5db'){const t=this.add.text(x,y,texto,{fontSize:'16px',fontStyle:'bold',color:cor,stroke:'#3b271e',strokeThickness:4}).setOrigin(.5).setDepth(100);this.tweens.add({targets:t,y:y-45,alpha:0,duration:1450,ease:'Sine.easeOut',onComplete:()=>t.destroy()})}
+    piscarEstacao(id){const e=EST[id];if(!e)return;this.tweens.add({targets:e.ring,scaleX:1.2,scaleY:1.2,alpha:1,duration:180,yoyo:true,repeat:2})}
+
+    update(t){
+      const c=this.avatares[this.meuSid];if(!c)return;
+      const k=this.keys;let dx=0,dy=0;
+      if(k.A.isDown||k.LEFT.isDown)dx--;if(k.D.isDown||k.RIGHT.isDown)dx++;
+      if(k.W.isDown||k.UP.isDown)dy--;if(k.S.isDown||k.DOWN.isDown)dy++;
+      if(dx||dy){const len=Math.hypot(dx,dy);c.x=Phaser.Math.Clamp(c.x+dx/len*3.1,30,1150);c.y=Phaser.Math.Clamp(c.y+dy/len*3.1,75,635);if(t-this.ultimoEnvio>75){this.ultimoEnvio=t;hooks.move(c.x,c.y)}}
+
+      let maisPerto=null,dist=9999;
+      Object.entries(EST).forEach(([id,e])=>{const d=Phaser.Math.Distance.Between(c.x,c.y,e.x,e.y);e.ring.setVisible(d<120);if(d<dist){dist=d;maisPerto=id}});
+      this.perto=dist<92?maisPerto:null;
+      hooks.near(this.perto);
+
+      const ctx=hooks.ctx();let texto='Explore a vila · WASD / setas';
+      if(this.perto){
+        if(ctx.papel==='mestre'&&this.perto==='prefeitura')texto=ctx.estado.fase==='aguardando'?'[E] Abrir temporada':'Temporada já aberta';
+        else if(ctx.papel==='jogador'){
+          const mapa={torrefacao:'[E] Torrar 12 cacaus',moagem:'[E] Moer cacau torrado',moldagem:'[E] Moldar chocolate',vitrine:'[E] Abastecer vitrine'};
+          texto=mapa[this.perto]||'Área administrativa do Mestre';
+        } else texto='Esta estação é usada pelos Jogadores';
+      }
+      this.promptTexto.setText(texto);
+      if(Phaser.Input.Keyboard.JustDown(k.E)&&this.perto)hooks.action(this.perto);
+    }
+  }
+
+  return{
+    start(id){game=new Phaser.Game({type:Phaser.AUTO,parent:id,width:W,height:H,backgroundColor:'#7faa68',scene:Vila,audio:{noAudio:true},render:{antialias:true,pixelArt:false},scale:{mode:Phaser.Scale.FIT,autoCenter:Phaser.Scale.CENTER_BOTH}})},
+    sync:(...a)=>cena&&cena.sync(...a),entrou:(...a)=>cena&&cena.entrou(...a),saiu:(...a)=>cena&&cena.saiu(...a),remoto:(...a)=>cena&&cena.remoto(...a),
+    flutuar:(...a)=>cena&&cena.flutuar(...a),piscar:(...a)=>cena&&cena.piscarEstacao(...a)
+  };
+}
+
+const {createApp,ref,reactive,computed,nextTick}=Vue;
+createApp({
+  setup(){
+    const nome=ref(''),papel=ref(''),conectado=ref(false),eventos=ref([]),ultimoErro=ref(''),estacaoPerto=ref(null);
+    const estado=reactive({fase:'aguardando',cacau:0,cacau_torrado:0,massa_cacau:0,barras:0,vitrine_barras:0,producao:10,intervalo:6});
+    let socket;
+
+    function registrar(sentido,nomeEvento,dados,reacao){eventos.value.unshift({sentido,nome:nomeEvento,causa:dados&&dados.causa,reacao});eventos.value=eventos.value.slice(0,45)}
+    function pedir(nomeEvento){ultimoErro.value='';registrar('enviado',nomeEvento,{},'pedido enviado ao servidor');socket.emit(nomeEvento)}
+    function ouvir(nomeEvento,reacao,fn){socket.on(nomeEvento,d=>{registrar('recebido',nomeEvento,d,reacao);if(d.estado)Object.assign(estado,d.estado);if(fn)fn(d)})}
+
+    const jogo=criarJogo2D({
+      move:(x,y)=>socket&&socket.emit('jogador.movimentou',{x,y}),
+      near:id=>estacaoPerto.value=id,
+      ctx:()=>({papel:papel.value,estado}),
+      action:id=>{
+        if(papel.value==='mestre'&&id==='prefeitura')pedir('vila.abertura_solicitada');
+        if(papel.value==='jogador'){
+          const eventosPorEstacao={torrefacao:'lote.torrefacao_solicitada',moagem:'lote.moagem_solicitada',moldagem:'lote.moldagem_solicitada',vitrine:'lote.vitrine_solicitada'};
+          if(eventosPorEstacao[id])pedir(eventosPorEstacao[id]);
+        }
+      }
+    });
+
+    function entrar(p){
+      papel.value=p;socket=io({auth:{nome:nome.value||'Anônimo',papel:p}});
+      socket.on('connect',()=>{conectado.value=true;nextTick(()=>jogo.start('jogo'))});
+      ouvir('estado.sincronizado','desenha o estado atual e os jogadores',d=>setTimeout(()=>jogo.sync(d.meu_sid,d.jogadores),80));
+      ouvir('jogador.entrou','desenha o novo personagem',d=>jogo.entrou(d.sid,d.jogador));
+      ouvir('jogador.saiu','remove o personagem que desconectou',d=>jogo.saiu(d.sid));
+      socket.on('jogador.posicao_atualizada',d=>jogo.remoto(d.sid,d.x,d.y));
+      ouvir('vila.iniciada','abre a temporada para todos',d=>{jogo.flutuar('☀️ TEMPORADA ABERTA',590,335,'#fff0a8');jogo.piscar('prefeitura')});
+      ouvir('recurso.produzido','atualiza o estoque automático de cacau',d=>jogo.flutuar('+'+d.quantidade+' 🌰',130,270,'#efffa9'));
+      ouvir('lote.torrado','mostra o lote torrado',d=>{jogo.flutuar('+10 CACAU TORRADO',325,275,'#ffd18d');jogo.piscar('torrefacao')});
+      ouvir('lote.moido','mostra a massa de cacau pronta',d=>{jogo.flutuar('MASSA PRONTA',590,265,'#fff0c2');jogo.piscar('moagem')});
+      ouvir('lote.moldado','mostra as barras produzidas',d=>{jogo.flutuar('+'+d.quantidade+' BARRAS 🍫',840,280,'#ffd9b0');jogo.piscar('moldagem')});
+      ouvir('lote.exposto','abastece a vitrine',d=>{jogo.flutuar('VITRINE +'+d.quantidade+' 🍫',1010,575,'#fff1a8');jogo.piscar('vitrine')});
+      ouvir('operacao.recusada','mostra a recusa somente para quem pediu',d=>{ultimoErro.value=d.motivo;setTimeout(()=>{if(ultimoErro.value===d.motivo)ultimoErro.value=''},3500)});
+    }
+
+    const progresso=computed(()=>{if(estado.barras>0)return 4;if(estado.massa_cacau>0)return 3;if(estado.cacau_torrado>=10)return 2;return 1});
+    function etapaClasse(n){return{active:progresso.value===n,done:n<progresso.value||(n===4&&estado.vitrine_barras>0)}}
+    const dicaAtual=computed(()=>{
+      if(estado.fase==='aguardando')return papel.value==='mestre'?'Vá até a Prefeitura e pressione E para abrir a temporada.':'Aguarde o Mestre abrir a temporada.';
+      if(papel.value==='mestre')return 'A temporada está aberta. Observe os jogadores produzindo em tempo real.';
+      if(estacaoPerto.value)return 'Você está próximo de '+({torrefacao:'Torrefação',moagem:'Moagem',moldagem:'Moldagem',vitrine:'Vitrine',prefeitura:'Prefeitura'}[estacaoPerto.value])+'.';
+      return 'Siga as placas e caminhe até a próxima estação destacada no painel.';
+    });
+
+    return{nome,papel,conectado,estado,eventos,ultimoErro,dicaAtual,entrar,etapaClasse};
+  }
+}).mount('#app');
+</script>
+</body>
+</html>
