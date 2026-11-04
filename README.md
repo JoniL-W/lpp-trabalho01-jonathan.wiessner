@@ -1,23 +1,24 @@
-# Cacau Dourado — Vila da Chocolateria
+# Cacau Dourado - Vila da Chocolateria
 
-## Etapa 4 — mapa expandido e cadeia interativa
+## Revisao visual e de jogabilidade
 
-Nesta etapa o projeto deixa de parecer uma demonstracao de botoes e passa a funcionar como um jogo 2D exploravel.
+Esta versao preserva toda a Etapa 5 e melhora a apresentacao do jogo sem alterar o paradigma orientado a eventos.
 
-### O que foi adicionado
-- personagem controlado por WASD ou setas;
-- multiplayer visivel em tempo real;
-- interacao por proximidade usando a tecla E;
-- Prefeitura para o Mestre abrir a temporada;
-- Torrefacao, Moagem, Moldagem e Vitrine;
-- pomar de cacau, rio, ponte, caminhos, cercas, arvores, flores, caixas e decoracao;
-- producao automatica de cacau pelo servidor;
-- painel de eventos mostrando pedidos e fatos.
-
-### Fluxo jogavel
-1. O Mestre vai ate a Prefeitura e pressiona E.
-2. O Jogador vai ate a Torrefacao e pressiona E.
-3. Vai ate a Moagem e pressiona E.
-4. Vai ate a Moldagem e pressiona E.
-5. Leva as barras ate a Vitrine e pressiona E.
+### Melhorias desta revisao
+- tela inteira sem rolagem da pagina;
+- painel de eventos com rolagem interna;
+- mapa ocupa a maior parte da tela;
+- HUD lateral compacto;
+- personagem redesenhado como chocolatier e Mestre;
+- animacao de caminhada em quatro direcoes;
+- Phaser Arcade Physics para movimento;
+- velocidade de caminhada aumentada;
+- `Shift` ativa corrida;
+- colisao com construcoes principais e casas;
+- seta dourada indica o proximo objetivo;
+- vila redesenhada com praca, fonte de chocolate, rio, ponte, pomar, casas, barraca, bancos, flores e iluminacao;
+- construcoes de producao redesenhadas e animadas;
+- torrefacao possui fumaca, moagem possui engrenagem animada e vitrine possui iluminacao;
+- cliente continua aparecendo dentro do mapa;
+- timers de lote e pedido ficam sempre visiveis no HUD.
 
