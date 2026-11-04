@@ -30,18 +30,19 @@
     .game-shell{position:relative;min-width:0;min-height:0;height:100%;overflow:hidden;border-radius:16px;border:1px solid #5a4034;background:#6e9c59;box-shadow:0 14px 45px #0006}
     #jogo{position:absolute;inset:0;display:grid;place-items:center;overflow:hidden}
     #jogo canvas{display:block;max-width:100%!important;max-height:100%!important;width:auto!important;height:auto!important}
-    .controls-float{position:absolute;left:10px;top:10px;z-index:4;display:flex;gap:5px;pointer-events:none}.control-chip{padding:5px 7px;border-radius:8px;background:#1c1512d9;border:1px solid #62483c;color:#f5e8da;font-size:9px;font-weight:800;backdrop-filter:blur(4px)}.control-chip b{color:#ffd47b}
+    .controls-float{position:absolute;left:10px;top:10px;z-index:4;display:flex;gap:5px;pointer-events:none}.developer-float{position:absolute;left:10px;bottom:8px;z-index:4;padding:4px 7px;border-radius:7px;background:#1c1512cc;border:1px solid #5b4135;color:#d8c6b6;font-size:8px;font-weight:700;pointer-events:none;backdrop-filter:blur(3px)}.control-chip{padding:5px 7px;border-radius:8px;background:#1c1512d9;border:1px solid #62483c;color:#f5e8da;font-size:9px;font-weight:800;backdrop-filter:blur(4px)}.control-chip b{color:#ffd47b}
 
     .sidebar{min-height:0;display:grid;grid-template-rows:auto auto auto minmax(0,1fr);gap:7px}
     .panel{min-width:0;background:linear-gradient(180deg,#30211b,#261a16);border:1px solid #563d32;border-radius:13px;padding:9px 10px;overflow:hidden}
     .panel-title{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:7px}.panel h2{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:#e9c98e;margin:0}.tiny{font-size:9px;color:#a89382}
-    .stats-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px}.stat{background:#1d1512;border:1px solid #49342b;border-radius:9px;padding:6px;min-width:0}.stat small{display:block;font-size:8px;color:#a99584;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.stat strong{display:block;margin-top:1px;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.stat.emphasis{border-color:#77593a;background:#251a13}.stat.good{border-color:#426344;background:#172019}
+    .stats-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px}.stat{background:#1d1512;border:1px solid #49342b;border-radius:9px;padding:6px;min-width:0}.stat small{display:block;font-size:8px;color:#a99584;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.stat strong{display:block;margin-top:1px;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.stat.emphasis{border-color:#77593a;background:#251a13}.stat.good{border-color:#426344;background:#172019}
     .phase-line{margin-top:5px;display:flex;align-items:center;justify-content:space-between;gap:6px;font-size:9px;color:#c9b8a8}.phase-badge{padding:3px 6px;border-radius:999px;background:#172019;border:1px solid #38523a;color:#bfe4b8;font-weight:800}
 
     .mission{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center}.mission-main{min-width:0}.mission-label{font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:#c9ad7c}.mission-text{font-size:12px;font-weight:900;color:#fff;margin-top:2px;line-height:1.2}.mission-sub{font-size:9px;color:#b9a696;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.mission-icon{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;background:#1c1512;border:1px solid #5a4033;font-size:24px}.alert-box{margin-top:7px;border-radius:9px;padding:6px 8px;font-size:9px;line-height:1.3;background:#3b1c17;border:1px solid #7f4339;color:#ffc0b6}
     .timer-row{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:7px}.timer-card{background:#1c1512;border:1px solid #4c362c;border-radius:9px;padding:6px}.timer-head{display:flex;justify-content:space-between;gap:6px;font-size:8px;color:#b9a696}.timer-head b{font-size:11px;color:#ffe0a4}.meter{height:5px;margin-top:4px;border-radius:999px;background:#0f0b09;overflow:hidden}.meter span{display:block;height:100%;background:linear-gradient(90deg,#df9a48,#f1cf76);transition:width .18s linear}.meter.green span{background:linear-gradient(90deg,#5e9758,#a5cd79)}.timer-card.danger{border-color:#8a493f}.timer-card.danger .timer-head b{color:#ff9b8d}
 
     .route{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}.route-step{position:relative;border:1px solid #4b352c;background:#1d1512;border-radius:9px;padding:6px 4px;text-align:center;min-width:0}.route-step .ico{font-size:16px;line-height:1}.route-step strong{display:block;font-size:8px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.route-step small{font-size:7px;color:#9d897a}.route-step.active{border-color:#c08d48;background:#382719;box-shadow:inset 0 0 0 1px #e1b66c33}.route-step.done{border-color:#416142;background:#172019}.route-step.active:after{content:"";position:absolute;left:50%;bottom:-5px;transform:translateX(-50%);width:18px;height:3px;border-radius:99px;background:#e6b659}
+    .build-summary{margin-top:7px;display:grid;grid-template-columns:repeat(4,1fr);gap:5px}.build-item{background:#1c1512;border:1px solid #4b352c;border-radius:8px;padding:5px;text-align:center;min-width:0}.build-item small{display:block;font-size:7px;color:#a99584;text-transform:uppercase}.build-item strong{display:block;font-size:10px;margin-top:1px;color:#f7e3bf}.build-item.warn{border-color:#8b6941;background:#2b2016}.counter-strip{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;margin:0 0 4px}.counter-strip::-webkit-scrollbar{display:none}.counter-chip{flex:0 0 auto;padding:2px 5px;border-radius:999px;background:#17110f;border:1px solid #49352c;font:7.5px ui-monospace,monospace;color:#c9b8a8}.counter-chip b{color:#f2d49b}
 
     .events-panel{min-height:0;display:grid;grid-template-rows:auto minmax(0,1fr);padding-bottom:6px}.events-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:5px}.event-count{font-size:8px;color:#9e897a}.events{min-height:0;overflow:auto;overscroll-behavior:contain;padding-right:3px;scrollbar-width:thin;scrollbar-color:#68493a #211713}.event{border-left:3px solid #6f9f6d;background:#1b1411;padding:5px 6px;margin:4px 0;border-radius:0 7px 7px 0;font:8.5px/1.28 ui-monospace,SFMono-Regular,Consolas,monospace;color:#d8c8bb}.event.emit{border-left-color:#6095b9}.event.reject{border-left-color:#c85e53}.event-top{display:flex;gap:5px;align-items:center;justify-content:space-between}.event strong{color:white;font-size:9px}.event .dir{font-weight:900;color:#d6c6b7}.event-meta{color:#9e8a7d;margin-top:2px}.empty{display:grid;place-items:center;height:100%;min-height:60px;color:#8f7c6d;font-size:10px;text-align:center}
 
@@ -86,6 +87,7 @@
           <span class="control-chip"><b>E</b> interagir</span>
         </div>
         <div id="jogo"></div>
+        <div class="developer-float">Desenvolvido por Jonathan Wiessner • LPP 2026/2</div>
       </section>
 
       <aside class="sidebar">
@@ -100,6 +102,8 @@
             <div class="stat good"><small>Moedas</small><strong>&#129689; {{estado.moedas}}</strong></div>
             <div class="stat good"><small>Reputacao</small><strong>&#11088; {{estado.reputacao}}</strong></div>
             <div class="stat"><small>Producao</small><strong>+{{estado.producao}}</strong></div>
+            <div class="stat"><small>Chocolateiros</small><strong>&#128119; {{estado.trabalhadores}}/{{estado.limite_trabalhadores}}</strong></div>
+            <div class="stat"><small>Expansoes</small><strong>&#127968; {{estado.concluidas}}/3</strong></div>
           </div>
           <div class="phase-line"><span>Temporada compartilhada</span><span class="phase-badge">{{estado.fase}}</span></div>
         </section>
@@ -134,15 +138,25 @@
             <div class="route-step" :class="etapaClasse(3)"><span class="ico">&#127851;</span><strong>Moldar</strong><small>corra!</small></div>
             <div class="route-step" :class="etapaClasse(4)"><span class="ico">&#128717;</span><strong>Vitrine</strong><small>entregue</small></div>
           </div>
+          <div class="build-summary">
+            <div class="build-item"><small>Custo</small><strong>{{estado.custo_construcao}} cacau</strong></div>
+            <div class="build-item"><small>Obra</small><strong>{{estado.tempo_obra}}s</strong></div>
+            <div class="build-item"><small>Em obra</small><strong>{{estado.em_obra}}</strong></div>
+            <div class="build-item warn"><small>Bonus</small><strong>+3 producao</strong></div>
+          </div>
         </section>
 
         <section class="panel events-panel">
-          <div class="events-head"><h2>Painel de eventos</h2><span class="event-count">{{eventos.length}} eventos</span></div>
+          <div>
+            <div class="events-head"><h2>Painel de eventos</h2><span class="event-count">{{eventos.length}} eventos</span></div>
+            <div class="counter-strip"><span v-for="(n,nomeEvento) in contadores" :key="nomeEvento" class="counter-chip">{{nomeEvento}} <b>x{{n}}</b></span></div>
+          </div>
           <div class="events">
             <div v-if="!eventos.length" class="empty">Os eventos emitidos e escutados aparecem aqui.</div>
             <div v-for="(e,i) in eventos" :key="i" class="event" :class="{emit:e.sentido==='enviado',reject:e.nome==='operacao.recusada'}">
               <div class="event-top"><strong>{{e.nome}}</strong><span class="dir">{{e.sentido==='enviado'?'emit ->':'<- on'}}</span></div>
               <div class="event-meta" v-if="e.causa">causa: {{e.causa}}</div>
+              <div class="event-meta" v-if="e.dados">dados: {{e.dados}}</div>
               <div class="event-meta" v-if="e.reacao">reacao: {{e.reacao}}</div>
             </div>
           </div>
@@ -164,7 +178,10 @@ function criarJogo2D(hooks){
     torrefacao:{x:325,y:185,nome:'Torrefacao',icone:'\uD83D\uDD25'},
     moagem:{x:590,y:175,nome:'Moagem',icone:'\u2699'},
     moldagem:{x:840,y:190,nome:'Moldagem',icone:'\uD83C\uDF6B'},
-    vitrine:{x:1010,y:500,nome:'Vitrine',icone:'\uD83D\uDED2'}
+    vitrine:{x:1010,y:500,nome:'Vitrine',icone:'\uD83D\uDED2'},
+    lote1:{x:475,y:500,nome:'Lote 1',icone:'\uD83C\uDFD7'},
+    lote2:{x:735,y:500,nome:'Lote 2',icone:'\uD83C\uDFD7'},
+    lote3:{x:1090,y:165,nome:'Lote 3',icone:'\uD83C\uDFD7'}
   };
 
   class Vila extends Phaser.Scene{
@@ -227,11 +244,9 @@ function criarJogo2D(hooks){
       [[72,100],[132,96],[194,104],[75,163],[136,160],[194,168],[78,226],[141,224],[198,232]].forEach(([x,y],i)=>this.arvoreCacau(x,y,i));
       this.cerca(30,290,230,290);
 
-      // Casas decorativas para dar sensacao de vila.
-      this.casaDecorativa(475,500,0xf0d2a4,0x9a5b42,'Casa do Cacau');
-      this.casaDecorativa(735,500,0xe8c29d,0x6f4e3b,'Atelie');
-      this.casaDecorativa(1090,165,0xf0d6b4,0x87503f,'Armazem');
-      this.barraca(1045,330);this.banco(480,435);this.banco(700,435);
+      // A parte inferior e o canto superior direito agora possuem lotes de expansao jogaveis.
+      // As construcoes surgem por eventos; por isso nao sao desenhadas como casas fixas aqui.
+      this.barraca(1045,330);this.banco(520,435);this.banco(680,435);
       [[1095,80],[1130,260],[65,350],[1110,470],[260,520],[925,530]].forEach(([x,y],i)=>this.arvoreDecorativa(x,y,i));
       [[255,318],[520,320],[760,315],[940,322]].forEach(([x,y])=>this.poste(x,y));
       [[470,87],[720,88],[1080,356],[282,555],[910,86]].forEach(([x,y],i)=>this.flores(x,y,i));
@@ -253,6 +268,7 @@ function criarJogo2D(hooks){
 
     desenharEstacoes(){
       this.predioPrefeitura(EST.prefeitura.x,EST.prefeitura.y);this.predioTorrefacao(EST.torrefacao.x,EST.torrefacao.y);this.predioMoagem(EST.moagem.x,EST.moagem.y);this.predioMoldagem(EST.moldagem.x,EST.moldagem.y);this.predioVitrine(EST.vitrine.x,EST.vitrine.y);
+      this.desenharLotes();
       Object.entries(EST).forEach(([id,e])=>{const ring=this.add.ellipse(e.x,e.y+24,160,82).setStrokeStyle(3,0xffdc88,.55).setFillStyle(0xffdf7a,.04).setDepth(8).setVisible(false);e.ring=ring;this.tweens.add({targets:ring,alpha:{from:.3,to:.9},scaleX:{from:.96,to:1.04},scaleY:{from:.96,to:1.04},duration:780,yoyo:true,repeat:-1});this.add.text(e.x,e.y-108,e.icone+' '+e.nome.toUpperCase(),{fontSize:'12px',fontStyle:'bold',color:'#fff9ed',backgroundColor:'#2a1b16e8',padding:{x:8,y:5}}).setOrigin(.5).setDepth(30)})
     }
     basePredio(x,y,w,h,wall,roof){const g=this.add.graphics().setDepth(12);g.fillStyle(0x000000,.20).fillEllipse(x,y+45,w*.95,26);g.fillStyle(wall).fillRoundedRect(x-w/2,y-h/2,w,h,10);g.lineStyle(3,0x51372e).strokeRoundedRect(x-w/2,y-h/2,w,h,10);g.fillStyle(roof).fillTriangle(x-w*.6,y-h/2+2,x+w*.6,y-h/2+2,x,y-h/2-54);g.lineStyle(3,0x51372e).strokeTriangle(x-w*.6,y-h/2+2,x+w*.6,y-h/2+2,x,y-h/2-54);g.fillStyle(0xffffff,.09).fillTriangle(x-w*.53,y-h/2,x,y-h/2-46,x-w*.1,y-h/2);this.obstaculos.push({x,y:y-3,w:w*.9,h:h*.9});return g}
@@ -262,6 +278,26 @@ function criarJogo2D(hooks){
     predioMoagem(x,y){const g=this.basePredio(x,y,144,80,0xd8c08f,0x74503a);g.fillStyle(0x604236).fillRoundedRect(x-18,y-2,36,40,4);this.janela(g,x-50,y-10,23,22);this.engrenagem=this.add.container(x+43,y+3).setDepth(18);const gg=this.add.graphics();gg.lineStyle(7,0x66605a).strokeCircle(0,0,25);for(let a=0;a<Math.PI*2;a+=Math.PI/4){gg.lineStyle(5,0x66605a).lineBetween(Math.cos(a)*17,Math.sin(a)*17,Math.cos(a)*31,Math.sin(a)*31)}gg.fillStyle(0xb59669).fillCircle(0,0,7);this.engrenagem.add(gg);this.tweens.add({targets:this.engrenagem,angle:360,duration:9000,repeat:-1,ease:'Linear'})}
     predioMoldagem(x,y){const g=this.basePredio(x,y,150,82,0xddbea8,0x59352d);g.fillStyle(0x71452f).fillRoundedRect(x-20,y-2,40,41,4);this.janela(g,x-54,y-10,24,23);this.janela(g,x+54,y-10,24,23);g.fillStyle(0x4a2b23).fillRoundedRect(x-50,y+20,100,10,4);for(let i=-40;i<=40;i+=16){g.fillStyle(i%32===0?0xf1dfc8:0x914c3b).fillRoundedRect(x+i-7,y+20,14,10,2)}}
     predioVitrine(x,y){const g=this.basePredio(x,y,162,84,0xf0d1b2,0x84463a);g.fillStyle(0x74aabd).fillRoundedRect(x-58,y-10,110,40,6);g.fillStyle(0xd8f0f4,.35).fillRoundedRect(x-54,y-6,102,13,4);g.fillStyle(0x5c392d).fillRoundedRect(x+48,y-3,24,40,3);for(let i=-54;i<=54;i+=18){g.fillStyle(i%36===0?0xf4dfbb:0xa94f45).fillRect(x+i,y-46,18,14)}g.fillStyle(0x633829).fillRoundedRect(x-62,y+22,96,8,3);for(let i=0;i<5;i++){g.fillStyle(0x4e2b20).fillRoundedRect(x-48+i*18,y+12,13,8,2)}const light=this.add.circle(x,y-65,18,0xffd86a,.09).setDepth(10);this.tweens.add({targets:light,alpha:{from:.04,to:.18},scale:{from:.9,to:1.25},duration:1300,yoyo:true,repeat:-1})}
+
+    desenharLotes(){this.lotesVisuais={};['lote1','lote2','lote3'].forEach(id=>this.renderLote(id,{status:'livre'}))}
+    renderLote(id,info){
+      const e=EST[id];if(!e)return;if(this.lotesVisuais[id])this.lotesVisuais[id].destroy(true);
+      const c=this.add.container(e.x,e.y).setDepth(11);const g=this.add.graphics();const status=(info&&info.status)||'livre';
+      g.fillStyle(0x000000,.13).fillEllipse(0,35,132,24);g.fillStyle(0xa87950,.78).fillRoundedRect(-58,-31,116,64,9);g.lineStyle(2,0x6e4d35,.75).strokeRoundedRect(-58,-31,116,64,9);
+      if(status==='livre'){
+        for(let x=-48;x<=48;x+=24){g.fillStyle(0x6e4d35).fillRect(x-2,-29,4,58)}g.lineStyle(3,0xddc39b,.5).lineBetween(-52,-18,52,18).lineBetween(-52,18,52,-18);
+        const placa=this.add.text(0,2,'LOTE LIVRE',{fontSize:'10px',fontStyle:'bold',color:'#fff1cf',backgroundColor:'#4a3024dd',padding:{x:7,y:4}}).setOrigin(.5);c.add([g,placa]);
+      }else if(status==='em_obra'){
+        g.fillStyle(0xe2bd78).fillRoundedRect(-43,7,86,20,4);g.fillStyle(0x77513a).fillRect(-40,-26,6,47).fillRect(34,-26,6,47).fillRect(-4,-30,6,54);g.lineStyle(4,0x9f744b).lineBetween(-42,-12,42,-12).lineBetween(-42,5,42,5);g.lineStyle(3,0xd7ae67).lineBetween(-38,-24,38,18).lineBetween(38,-24,-38,18);
+        const ico=this.add.text(0,-43,'🚧',{fontSize:'24px'}).setOrigin(.5);const txt=this.add.text(0,39,'OBRA • '+(info.por||'chocolatier'),{fontSize:'8px',fontStyle:'bold',color:'#fff',backgroundColor:'#4a3024dd',padding:{x:5,y:3}}).setOrigin(.5);c.add([g,ico,txt]);this.tweens.add({targets:ico,y:ico.y-5,duration:600,yoyo:true,repeat:-1,ease:'Sine.easeInOut'});
+      }else{
+        g.fillStyle(0xe7c39e).fillRoundedRect(-49,-31,98,65,8);g.lineStyle(2,0x5d3d31).strokeRoundedRect(-49,-31,98,65,8);g.fillStyle(0x6e3b31).fillTriangle(-58,-28,58,-28,0,-72);g.fillStyle(0x5a382c).fillRoundedRect(-12,1,24,33,4);g.fillStyle(0x7eb0bf).fillRoundedRect(-39,-12,20,21,3).fillRoundedRect(19,-12,20,21,3);g.fillStyle(0x4c2d24).fillRoundedRect(-42,14,84,8,3);
+        const ico=this.add.text(0,-50,'🍫',{fontSize:'18px'}).setOrigin(.5);const txt=this.add.text(0,45,'ANEXO • +3 PRODUCAO',{fontSize:'8px',fontStyle:'bold',color:'#fff7df',backgroundColor:'#3a271fdd',padding:{x:5,y:3}}).setOrigin(.5);c.add([g,ico,txt]);
+      }
+      this.lotesVisuais[id]=c;
+    }
+    atualizarExpansoes(estado){if(!estado||!estado.expansoes)return;Object.entries(estado.expansoes).forEach(([id,info])=>this.renderLote(id,info))}
+    posLote(id){const e=EST[id];return e?{x:e.x,y:e.y}:null}
 
     criarPrompt(){this.prompt=this.add.container(W/2,H-31).setDepth(120);const bg=this.add.graphics();bg.fillStyle(0x1d1411,.92).fillRoundedRect(-210,-19,420,38,12);bg.lineStyle(1,0xf0c873,.55).strokeRoundedRect(-210,-19,420,38,12);this.promptTexto=this.add.text(0,0,'Explore a vila - WASD / SHIFT',{fontFamily:'Segoe UI, sans-serif',fontSize:'14px',fontStyle:'bold',color:'#fff7e8'}).setOrigin(.5);this.prompt.add([bg,this.promptTexto]);this.prompt.setScrollFactor(0)}
     criarSetaObjetivo(){this.seta=this.add.container(0,0).setDepth(100);const t=this.add.triangle(0,0,0,0,18,0,9,14,0xffd15e,1).setStrokeStyle(2,0x5f3d25);const glow=this.add.circle(9,-4,18,0xffd15e,.10);this.seta.add([glow,t]);this.seta.setVisible(false);this.tweens.add({targets:this.seta,y:'+=8',duration:650,yoyo:true,repeat:-1,ease:'Sine.easeInOut'})}
@@ -277,40 +313,46 @@ function criarJogo2D(hooks){
     piscarEstacao(id){const e=EST[id];if(e)this.tweens.add({targets:e.ring,scaleX:1.2,scaleY:1.2,alpha:1,duration:170,yoyo:true,repeat:2})}
     mostrarCliente(pedido){if(this.cliente){this.cliente.destroy(true);this.cliente=null}if(!pedido)return;const c=this.add.container(1092,450).setDepth(75);const sh=this.add.ellipse(0,29,34,10,0x000000,.2);const body=this.add.rectangle(0,8,26,34,0x6a7fa8).setStrokeStyle(2,0x33405a);const head=this.add.circle(0,-17,12,0xe1b38d).setStrokeStyle(2,0x4b3024);const hair=this.add.arc(0,-22,11,185,355,false,0x493127);const bubble=this.add.graphics();bubble.fillStyle(0xfff7e9,.98).fillRoundedRect(-108,-80,104,46,10);bubble.lineStyle(2,0x65483b).strokeRoundedRect(-108,-80,104,46,10);bubble.fillTriangle(-10,-48,4,-42,-12,-35);const txt=this.add.text(-56,-57,pedido.quantidade+' barras',{fontSize:'11px',fontStyle:'bold',color:'#3b271e'}).setOrigin(.5);const nome=this.add.text(0,43,pedido.cliente,{fontSize:'9px',fontStyle:'bold',color:'#fff',backgroundColor:'#261912dd',padding:{x:4,y:2}}).setOrigin(.5);c.add([sh,body,head,hair,bubble,txt,nome]);this.cliente=c;this.tweens.add({targets:c,y:c.y-5,duration:850,yoyo:true,repeat:-1,ease:'Sine.easeInOut'})}
     removerCliente(){if(this.cliente){const c=this.cliente;this.cliente=null;this.tweens.add({targets:c,alpha:0,x:1130,duration:320,onComplete:()=>c.destroy(true)})}}
-    objetivoAtual(ctx){if(ctx.estado.fase==='aguardando')return ctx.papel==='mestre'?'prefeitura':null;if(ctx.papel==='mestre')return null;const prontas=(ctx.estado.barras_premium||0)+(ctx.estado.barras_comuns||0);const total=(ctx.estado.vitrine_premium||0)+(ctx.estado.vitrine_comuns||0);if(ctx.estado.pedido_ativo&&total>=ctx.estado.pedido_ativo.quantidade)return'vitrine';if(prontas>0)return'vitrine';if(ctx.estado.lote_atual||ctx.estado.massa_cacau>0)return'moldagem';if(ctx.estado.cacau_torrado>=10)return'moagem';return'torrefacao'}
+    objetivoAtual(ctx){if(ctx.estado.fase==='aguardando')return ctx.papel==='mestre'?'prefeitura':null;if(ctx.papel==='mestre')return null;if(ctx.estado.fase==='encerrada')return null;if((ctx.estado.concluidas||0)===0&&(ctx.estado.em_obra||0)===0&&(ctx.estado.cacau||0)>=(ctx.estado.custo_construcao||45)){const livre=Object.entries(ctx.estado.expansoes||{}).find(([,v])=>v.status==='livre');if(livre)return livre[0]}const prontas=(ctx.estado.barras_premium||0)+(ctx.estado.barras_comuns||0);const total=(ctx.estado.vitrine_premium||0)+(ctx.estado.vitrine_comuns||0);if(ctx.estado.pedido_ativo&&total>=ctx.estado.pedido_ativo.quantidade)return'vitrine';if(prontas>0)return'vitrine';if(ctx.estado.lote_atual||ctx.estado.massa_cacau>0)return'moldagem';if(ctx.estado.cacau_torrado>=10)return'moagem';return'torrefacao'}
 
     update(t){const c=this.avatares[this.meuSid];if(!c||!c.body)return;const k=this.keys;let dx=0,dy=0;if(k.A.isDown||k.LEFT.isDown)dx--;if(k.D.isDown||k.RIGHT.isDown)dx++;if(k.W.isDown||k.UP.isDown)dy--;if(k.S.isDown||k.DOWN.isDown)dy++;const moving=!!(dx||dy);const sprint=k.SHIFT.isDown;const speed=sprint?690:470;if(moving){const len=Math.hypot(dx,dy);c.body.setVelocity(dx/len*speed,dy/len*speed)}else c.body.setVelocity(0,0);this.animarAvatar(c,dx,dy,t,moving);c.setDepth(70+c.y/1000);
       if(moving&&t-this.ultimoEnvio>45){this.ultimoEnvio=t;hooks.move(c.x,c.y)}
       Object.entries(this.avatares).forEach(([sid,av])=>{if(sid===this.meuSid)return;const ox=av.x,oy=av.y;av.x=Phaser.Math.Linear(av.x,av.alvoX,.22);av.y=Phaser.Math.Linear(av.y,av.alvoY,.22);this.animarAvatar(av,av.x-ox,av.y-oy,t,Math.abs(av.x-ox)+Math.abs(av.y-oy)>.15);av.setDepth(70+av.y/1000)});
       let nearest=null,dist=9999;Object.entries(EST).forEach(([id,e])=>{const d=Phaser.Math.Distance.Between(c.x,c.y,e.x,e.y);e.ring.setVisible(d<125);if(d<dist){dist=d;nearest=id}});this.perto=dist<92?nearest:null;hooks.near(this.perto);
       const ctx=hooks.ctx();const target=this.objetivoAtual(ctx);if(target&&EST[target]){this.seta.setVisible(true);this.seta.x=EST[target].x-9;this.seta.y=EST[target].y-132}else this.seta.setVisible(false);
-      let texto=sprint?'Correndo - solte SHIFT para andar':'WASD mover - SHIFT correr - E interagir';if(this.perto){if(ctx.papel==='mestre'&&this.perto==='prefeitura')texto=ctx.estado.fase==='aguardando'?'[E] Abrir temporada':'Temporada ja aberta';else if(ctx.papel==='jogador'){const ready=(ctx.estado.barras_premium||0)+(ctx.estado.barras_comuns||0);const map={torrefacao:'[E] Torrar 12 cacaus',moagem:'[E] Moer cacau torrado',moldagem:'[E] Moldar chocolate'};if(this.perto==='vitrine'){if(ready>0)texto='[E] Abastecer a vitrine';else if(ctx.estado.pedido_ativo)texto='[E] Entregar pedido';else texto='Vitrine aguardando producao';}else texto=map[this.perto]||'Area do Mestre'}else texto='Esta estacao e usada pelos Jogadores'}this.promptTexto.setText(texto);if(Phaser.Input.Keyboard.JustDown(k.E)&&this.perto)hooks.action(this.perto)}
+      let texto=sprint?'Correndo - solte SHIFT para andar':'WASD mover - SHIFT correr - E interagir';if(this.perto){if(ctx.papel==='mestre'&&this.perto==='prefeitura'){texto=ctx.estado.fase==='aguardando'?'[E] Abrir temporada':ctx.estado.fase==='aberta'?'[E] Encerrar temporada':'Temporada encerrada'}else if(ctx.papel==='jogador'){const ready=(ctx.estado.barras_premium||0)+(ctx.estado.barras_comuns||0);const map={torrefacao:'[E] Torrar 12 cacaus',moagem:'[E] Moer cacau torrado',moldagem:'[E] Moldar chocolate'};if(this.perto.startsWith('lote')){const info=(ctx.estado.expansoes||{})[this.perto];if(!info||info.status==='livre')texto='[E] Construir expansao ('+(ctx.estado.custo_construcao||45)+' cacaus)';else if(info.status==='em_obra')texto='Obra em andamento - chocolateiro ocupado';else texto='Expansao concluida • +3 producao'}else if(this.perto==='vitrine'){if(ready>0)texto='[E] Abastecer a vitrine';else if(ctx.estado.pedido_ativo)texto='[E] Entregar pedido';else texto='Vitrine aguardando producao';}else texto=map[this.perto]||'Area do Mestre'}else texto='Esta estacao e usada pelos Jogadores'}this.promptTexto.setText(texto);if(Phaser.Input.Keyboard.JustDown(k.E)&&this.perto)hooks.action(this.perto)}
   }
 
   return{
     start(id){game=new Phaser.Game({type:Phaser.AUTO,parent:id,width:W,height:H,backgroundColor:'#87b968',scene:Vila,audio:{noAudio:true},render:{antialias:true,pixelArt:false},physics:{default:'arcade',arcade:{gravity:{y:0},debug:false}},scale:{mode:Phaser.Scale.FIT,autoCenter:Phaser.Scale.CENTER_BOTH}})},
     sync:(...a)=>cena&&cena.sync(...a),entrou:(...a)=>cena&&cena.entrou(...a),saiu:(...a)=>cena&&cena.saiu(...a),remoto:(...a)=>cena&&cena.remoto(...a),
-    flutuar:(...a)=>cena&&cena.flutuar(...a),piscar:(...a)=>cena&&cena.piscarEstacao(...a),pedido:p=>cena&&cena.mostrarCliente(p),removerCliente:()=>cena&&cena.removerCliente()
+    flutuar:(...a)=>cena&&cena.flutuar(...a),piscar:(...a)=>cena&&cena.piscarEstacao(...a),pedido:p=>cena&&cena.mostrarCliente(p),removerCliente:()=>cena&&cena.removerCliente(),
+    expansoes:e=>cena&&cena.atualizarExpansoes(e),posLote:id=>cena&&cena.posLote(id)
   };
 }
 
 const {createApp,ref,reactive,computed,nextTick}=Vue;
 createApp({
   setup(){
-    const nome=ref(''),papel=ref(''),conectado=ref(false),eventos=ref([]),ultimoErro=ref(''),estacaoPerto=ref(null),agora=ref(Date.now());
-    const estado=reactive({fase:'aguardando',cacau:0,cacau_torrado:0,massa_cacau:0,barras_premium:0,barras_comuns:0,vitrine_premium:0,vitrine_comuns:0,moedas:0,reputacao:0,producao:10,intervalo:6,lote_atual:null,pedido_ativo:null,pedidos_entregues:0,pedidos_perdidos:0});
+    const nome=ref(''),papel=ref(''),conectado=ref(false),eventos=ref([]),ultimoErro=ref(''),estacaoPerto=ref(null),agora=ref(Date.now());const contadores=reactive({});
+    const estado=reactive({fase:'aguardando',cacau:0,cacau_torrado:0,massa_cacau:0,barras_premium:0,barras_comuns:0,vitrine_premium:0,vitrine_comuns:0,moedas:0,reputacao:0,producao:10,intervalo:6,lote_atual:null,pedido_ativo:null,pedidos_entregues:0,pedidos_perdidos:0,trabalhadores:0,limite_trabalhadores:2,custo_construcao:45,tempo_obra:9,em_obra:0,concluidas:0,expansoes:{}});
     setInterval(()=>agora.value=Date.now(),200);let socket;
-    function registrar(sentido,nomeEvento,dados,reacao){eventos.value.unshift({sentido,nome:nomeEvento,causa:dados&&dados.causa,reacao});eventos.value=eventos.value.slice(0,80)}
-    function pedir(nomeEvento){ultimoErro.value='';registrar('enviado',nomeEvento,{},'pedido enviado ao servidor');socket.emit(nomeEvento)}
+    function dadosVisiveis(d){if(!d)return'';const limpo={};Object.entries(d).forEach(([k,v])=>{if(['estado','causa','jogadores','meu_sid'].includes(k))return;limpo[k]=v});const txt=JSON.stringify(limpo);return txt==='{}'?'':txt.slice(0,170)}
+    function registrar(sentido,nomeEvento,dados,reacao){contadores[nomeEvento]=(contadores[nomeEvento]||0)+1;eventos.value.unshift({sentido,nome:nomeEvento,causa:dados&&dados.causa,dados:dadosVisiveis(dados),reacao});eventos.value=eventos.value.slice(0,80)}
+    function pedir(nomeEvento,dados={}){ultimoErro.value='';registrar('enviado',nomeEvento,dados,'pedido enviado ao servidor');socket.emit(nomeEvento,dados)}
     function ouvir(nomeEvento,reacao,fn){socket.on(nomeEvento,d=>{registrar('recebido',nomeEvento,d,reacao);if(d.estado)Object.assign(estado,d.estado);if(fn)fn(d)})}
     const jogo=criarJogo2D({
       move:(x,y)=>socket&&socket.emit('jogador.movimentou',{x,y}),near:id=>estacaoPerto.value=id,ctx:()=>({papel:papel.value,estado}),
-      action:id=>{if(papel.value==='mestre'&&id==='prefeitura')pedir('vila.abertura_solicitada');if(papel.value==='jogador'){const map={torrefacao:'lote.torrefacao_solicitada',moagem:'lote.moagem_solicitada',moldagem:'lote.moldagem_solicitada'};if(id==='vitrine'){const prontas=(estado.barras_premium||0)+(estado.barras_comuns||0);if(prontas>0)pedir('lote.vitrine_solicitada');else pedir('pedido.entrega_solicitada')}else if(map[id])pedir(map[id])}}
+      action:id=>{if(papel.value==='mestre'&&id==='prefeitura'){if(estado.fase==='aguardando')pedir('vila.abertura_solicitada');else if(estado.fase==='aberta')pedir('vila.encerramento_solicitado')}if(papel.value==='jogador'){const map={torrefacao:'lote.torrefacao_solicitada',moagem:'lote.moagem_solicitada',moldagem:'lote.moldagem_solicitada'};if(id.startsWith('lote'))pedir('construcao.solicitada',{lote:id});else if(id==='vitrine'){const prontas=(estado.barras_premium||0)+(estado.barras_comuns||0);if(prontas>0)pedir('lote.vitrine_solicitada');else pedir('pedido.entrega_solicitada')}else if(map[id])pedir(map[id])}}
     });
     function entrar(p){papel.value=p;socket=io({auth:{nome:nome.value||'Anonimo',papel:p}});socket.on('connect',()=>{conectado.value=true;nextTick(()=>jogo.start('jogo'))});
-      ouvir('estado.sincronizado','desenha estado e jogadores',d=>setTimeout(()=>{jogo.sync(d.meu_sid,d.jogadores);jogo.pedido(d.estado.pedido_ativo)},80));
+      ouvir('estado.sincronizado','desenha estado, expansoes e jogadores',d=>setTimeout(()=>{jogo.sync(d.meu_sid,d.jogadores);jogo.pedido(d.estado.pedido_ativo);jogo.expansoes(d.estado)},80));
       ouvir('jogador.entrou','desenha novo personagem',d=>jogo.entrou(d.sid,d.jogador));ouvir('jogador.saiu','remove personagem',d=>jogo.saiu(d.sid));socket.on('jogador.posicao_atualizada',d=>jogo.remoto(d.sid,d.x,d.y));
+      // ESCUTAS: cada fato do servidor produz uma reacao visual e fica registrado no painel.
       ouvir('vila.iniciada','abre temporada para todos',d=>{jogo.flutuar('TEMPORADA ABERTA',590,335,'#fff0a8');jogo.piscar('prefeitura')});
+      ouvir('vila.encerrada','encerra temporada e bloqueia novas acoes',d=>{jogo.flutuar('TEMPORADA ENCERRADA',590,335,'#c9d8ff');jogo.removerCliente();jogo.piscar('prefeitura')});
+      ouvir('construcao.iniciada','transforma lote em canteiro de obras',d=>{jogo.expansoes(d.estado);const p=jogo.posLote(d.lote);if(p){jogo.flutuar('OBRA INICIADA • -'+d.custo+' CACAU',p.x,p.y-65,'#ffe0a0');jogo.piscar(d.lote)}});
+      ouvir('construcao.concluida','transforma canteiro em anexo e libera trabalhador',d=>{jogo.expansoes(d.estado);const p=jogo.posLote(d.lote);if(p){jogo.flutuar('EXPANSAO PRONTA • +'+d.ganho_producao+' PRODUCAO',p.x,p.y-70,'#d9ffc6');jogo.piscar(d.lote)}});
       ouvir('recurso.produzido','atualiza cacau automatico',d=>jogo.flutuar('+'+d.quantidade+' CACAU',130,270,'#efffa9'));
       ouvir('lote.torrado','mostra lote torrado',d=>{jogo.flutuar('+10 TORRADO',325,275,'#ffd18d');jogo.piscar('torrefacao')});
       ouvir('lote.moido','inicia corrida para moldagem',d=>{jogo.flutuar('CORRA PARA A MOLDAGEM!',590,265,'#fff0c2');jogo.piscar('moagem')});
@@ -326,10 +368,10 @@ createApp({
     const segLote=computed(()=>estado.lote_atual?Math.max(0,Math.ceil(estado.lote_atual.expira_em-agora.value/1000)):0);const segPedido=computed(()=>estado.pedido_ativo?Math.max(0,Math.ceil(estado.pedido_ativo.expira_em-agora.value/1000)):0);
     const percentualLote=computed(()=>estado.lote_atual?Math.max(0,Math.min(100,(segLote.value/(estado.lote_atual.prazo||14))*100)):0);const percentualPedido=computed(()=>estado.pedido_ativo?Math.max(0,Math.min(100,(segPedido.value/(estado.pedido_ativo.prazo||30))*100)):0);
     const progresso=computed(()=>{if((estado.barras_premium||0)+(estado.barras_comuns||0)>0||totalVitrine.value>0)return 4;if(estado.lote_atual||estado.massa_cacau>0)return 3;if(estado.cacau_torrado>=10)return 2;return 1});function etapaClasse(n){return{active:progresso.value===n,done:n<progresso.value||(n===4&&totalVitrine.value>0)}}
-    const objetivoTitulo=computed(()=>{if(estado.fase==='aguardando')return papel.value==='mestre'?'Abra a temporada':'Aguarde o Mestre';if(papel.value==='mestre')return'Administre a temporada';const prontas=(estado.barras_premium||0)+(estado.barras_comuns||0);if(estado.pedido_ativo&&totalVitrine.value>=estado.pedido_ativo.quantidade)return'Entregue o pedido';if(prontas>0)return'Leve para a Vitrine';if(estado.lote_atual)return estado.lote_atual.status==='no_ponto'?'Corra para a Moldagem':'Molde o lote';if(estado.cacau_torrado>=10)return'Va para a Moagem';return'Comece na Torrefacao'});
-    const objetivoIcone=computed(()=>{const t=objetivoTitulo.value;if(t.includes('temporada')||t.includes('Mestre'))return'\uD83C\uDFDB';if(t.includes('Moldagem')||t.includes('Molde'))return'\uD83C\uDF6B';if(t.includes('Moagem'))return'\u2699';if(t.includes('Vitrine')||t.includes('pedido'))return'\uD83D\uDED2';if(t.includes('Torrefacao'))return'\uD83D\uDD25';return'\uD83C\uDF6B'});
-    const dicaAtual=computed(()=>{if(estado.fase==='aguardando')return papel.value==='mestre'?'Va ate a Prefeitura e pressione E.':'O Mestre precisa iniciar a temporada.';if(papel.value==='mestre')return'Observe os jogadores e os eventos em tempo real.';if(estado.lote_atual&&estado.lote_atual.status==='no_ponto')return'Use SHIFT para correr antes do tempo acabar.';if(estado.pedido_ativo)return estado.pedido_ativo.cliente+' quer '+estado.pedido_ativo.quantidade+' barras.';if(estacaoPerto.value)return'Pressione E para interagir com a estacao.';return'Siga a seta dourada no mapa.'});
-    return{nome,papel,conectado,estado,eventos,ultimoErro,estacaoPerto,entrar,totalVitrine,segLote,segPedido,percentualLote,percentualPedido,etapaClasse,objetivoTitulo,objetivoIcone,dicaAtual};
+    const objetivoTitulo=computed(()=>{if(estado.fase==='aguardando')return papel.value==='mestre'?'Abra a temporada':'Aguarde o Mestre';if(estado.fase==='encerrada')return'Temporada encerrada';if(papel.value==='mestre')return'Administre ou encerre na Prefeitura';if((estado.concluidas||0)===0&&(estado.em_obra||0)===0&&(estado.cacau||0)>=(estado.custo_construcao||45))return'Construa a primeira expansao';const prontas=(estado.barras_premium||0)+(estado.barras_comuns||0);if(estado.pedido_ativo&&totalVitrine.value>=estado.pedido_ativo.quantidade)return'Entregue o pedido';if(prontas>0)return'Leve para a Vitrine';if(estado.lote_atual)return estado.lote_atual.status==='no_ponto'?'Corra para a Moldagem':'Molde o lote';if(estado.cacau_torrado>=10)return'Va para a Moagem';return'Comece na Torrefacao'});
+    const objetivoIcone=computed(()=>{const t=objetivoTitulo.value;if(t.includes('temporada')||t.includes('Mestre'))return'\uD83C\uDFDB';if(t.includes('Moldagem')||t.includes('Molde'))return'\uD83C\uDF6B';if(t.includes('Moagem'))return'\u2699';if(t.includes('Vitrine')||t.includes('pedido'))return'\uD83D\uDED2';if(t.includes('expansao'))return'\uD83C\uDFD7';if(t.includes('Torrefacao'))return'\uD83D\uDD25';return'\uD83C\uDF6B'});
+    const dicaAtual=computed(()=>{if(estado.fase==='aguardando')return papel.value==='mestre'?'Va ate a Prefeitura e pressione E.':'O Mestre precisa iniciar a temporada.';if(estado.fase==='encerrada')return'Producao parada e novas acoes bloqueadas pelo servidor.';if(papel.value==='mestre')return'Na Prefeitura, pressione E para encerrar quando finalizar os testes.';if((estado.concluidas||0)===0&&(estado.em_obra||0)===0&&(estado.cacau||0)>=(estado.custo_construcao||45))return'Va ate um lote marcado com construcao e pressione E.';if(estado.lote_atual&&estado.lote_atual.status==='no_ponto')return'Use SHIFT para correr antes do tempo acabar.';if(estado.pedido_ativo)return estado.pedido_ativo.cliente+' quer '+estado.pedido_ativo.quantidade+' barras.';if(estacaoPerto.value)return'Pressione E para interagir com a estacao.';return'Siga a seta dourada no mapa.'});
+    return{nome,papel,conectado,estado,eventos,contadores,ultimoErro,estacaoPerto,entrar,totalVitrine,segLote,segPedido,percentualLote,percentualPedido,etapaClasse,objetivoTitulo,objetivoIcone,dicaAtual};
   }
 }).mount('#app');
 </script>

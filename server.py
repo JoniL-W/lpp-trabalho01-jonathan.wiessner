@@ -9,14 +9,29 @@ app = socketio.ASGIApp(
     static_files={"/": "client/index.html", "/assets": "client/assets"},
 )
 
+# Coordenadas usadas tanto para validar as interacoes quanto para desenhar a vila.
 ESTACOES = {
     "prefeitura": (165, 525),
     "torrefacao": (325, 185),
     "moagem": (590, 175),
     "moldagem": (840, 190),
     "vitrine": (1010, 500),
+    "lote1": (475, 500),
+    "lote2": (735, 500),
+    "lote3": (1090, 165),
 }
+LOTES = ("lote1", "lote2", "lote3")
 RAIO_INTERACAO = 92
+
+# Regras documentadas em docs/especificacao.md antes da implementacao.
+CUSTO_CONSTRUCAO = 45
+TEMPO_OBRA = 9
+GANHO_PRODUCAO = 3
+
+
+def novo_lote():
+    return {"status": "livre", "por": None, "conclui_em": None}
+
 
 estado = {
     "fase": "aguardando",
@@ -35,6 +50,14 @@ estado = {
     "pedido_ativo": None,
     "pedidos_entregues": 0,
     "pedidos_perdidos": 0,
+    # Estado das construcoes obrigatorias do trabalho.
+    "trabalhadores": 0,
+    "limite_trabalhadores": 2,
+    "custo_construcao": CUSTO_CONSTRUCAO,
+    "tempo_obra": TEMPO_OBRA,
+    "em_obra": 0,
+    "concluidas": 0,
+    "expansoes": {lote: novo_lote() for lote in LOTES},
 }
 
 jogadores = {}
@@ -50,6 +73,7 @@ CATALOGO = [
 
 
 def fato(causa, **extras):
+    """Todo fato carrega o estado atual e a causa que o gerou."""
     return {"estado": copy.deepcopy(estado), "causa": causa, **extras}
 
 
@@ -59,7 +83,7 @@ def jogadores_publicos():
 
 def perto(sid, estacao):
     jogador = jogadores.get(sid)
-    if not jogador:
+    if not jogador or estacao not in ESTACOES:
         return False
     x, y = ESTACOES[estacao]
     return math.hypot(jogador["x"] - x, jogador["y"] - y) <= RAIO_INTERACAO
@@ -70,6 +94,7 @@ def total_vitrine():
 
 
 async def recusar(sid, motivo, causa):
+    # Recusa e um FATO direcionado: somente quem fez o pedido deve recebe-lo.
     await sio.emit(
         "operacao.recusada",
         {"motivo": motivo, "causa": causa, "estado": copy.deepcopy(estado)},
@@ -87,6 +112,7 @@ async def connect(sid, environ, auth):
         "x": 185 if papel == "mestre" else 520,
         "y": 470 if papel == "mestre" else 515,
     }
+    # estado.sincronizado vai somente ao cliente novo: os demais ja possuem o estado.
     await sio.emit(
         "estado.sincronizado",
         {**fato("conexao"), "meu_sid": sid, "jogadores": jogadores_publicos()},
@@ -144,7 +170,30 @@ async def abrir_vila(sid, dados=None):
     estado["fase"] = "aberta"
     sio.start_background_task(producao_cacau)
     sio.start_background_task(gerar_pedidos)
+    # FATO para todos: a partir daqui temporizadores e acoes de jogo ficam liberados.
     await sio.emit("vila.iniciada", fato(pedido, por=jogador["nome"]))
+
+
+@sio.on("vila.encerramento_solicitado")
+async def encerrar_vila(sid, dados=None):
+    pedido = "vila.encerramento_solicitado"
+    jogador = jogadores.get(sid)
+    if not jogador or jogador["papel"] != "mestre":
+        await recusar(sid, "Somente o Mestre pode encerrar a temporada", pedido)
+        return
+    if not perto(sid, "prefeitura"):
+        await recusar(sid, "Chegue perto da Prefeitura para encerrar", pedido)
+        return
+    if estado["fase"] != "aberta":
+        await recusar(sid, "A temporada nao esta aberta", pedido)
+        return
+
+    estado["fase"] = "encerrada"
+    # Limpa atividades temporarias; novas acoes serao recusadas pelo servidor.
+    estado["pedido_ativo"] = None
+    estado["lote_atual"] = None
+    estado["massa_cacau"] = 0
+    await sio.emit("vila.encerrada", fato(pedido, por=jogador["nome"]))
 
 
 async def producao_cacau():
@@ -153,10 +202,96 @@ async def producao_cacau():
         if estado["fase"] != "aberta":
             break
         estado["cacau"] += estado["producao"]
+        # Evento espontaneo do servidor: ninguem clicou para produzir.
         await sio.emit(
             "recurso.produzido",
             fato("temporizador_producao", quantidade=estado["producao"]),
         )
+
+
+@sio.on("construcao.solicitada")
+async def construir(sid, dados=None):
+    pedido = "construcao.solicitada"
+    jogador = jogadores.get(sid)
+    dados = dados or {}
+    lote_id = str(dados.get("lote") or "")
+
+    # Toda validacao ocorre ANTES de alterar o estado e sem await entre validacao e alteracao.
+    # Assim dois pedidos simultaneos disputando o ultimo chocolateiro sao decididos em sequencia.
+    if not jogador or jogador["papel"] != "jogador":
+        motivo = "Somente Jogadores podem iniciar expansoes"
+    elif estado["fase"] != "aberta":
+        motivo = "A temporada nao esta aberta"
+    elif lote_id not in LOTES:
+        motivo = "Lote de construcao invalido"
+    elif not perto(sid, lote_id):
+        motivo = "Aproxime-se do lote de expansao"
+    elif estado["expansoes"][lote_id]["status"] != "livre":
+        motivo = "Este lote ja esta ocupado"
+    elif estado["trabalhadores"] >= estado["limite_trabalhadores"]:
+        motivo = "Sem chocolateiro livre"
+    elif estado["cacau"] < CUSTO_CONSTRUCAO:
+        motivo = f"Cacau insuficiente: a expansao custa {CUSTO_CONSTRUCAO}"
+    else:
+        motivo = None
+
+    if motivo:
+        await recusar(sid, motivo, pedido)
+        return
+
+    # Secao critica: nenhuma espera entre conferir disponibilidade e ocupar o recurso.
+    estado["cacau"] -= CUSTO_CONSTRUCAO
+    estado["trabalhadores"] += 1
+    estado["em_obra"] += 1
+    conclui_em = time.time() + TEMPO_OBRA
+    estado["expansoes"][lote_id] = {
+        "status": "em_obra",
+        "por": jogador["nome"],
+        "conclui_em": conclui_em,
+    }
+    nome = jogador["nome"]
+
+    # FATO para todos: transforma o lote em canteiro de obras.
+    await sio.emit(
+        "construcao.iniciada",
+        fato(
+            pedido,
+            por=nome,
+            lote=lote_id,
+            custo=CUSTO_CONSTRUCAO,
+            tempo=TEMPO_OBRA,
+        ),
+    )
+    sio.start_background_task(concluir_obra, lote_id, nome, conclui_em)
+
+
+async def concluir_obra(lote_id, nome, conclui_em):
+    await sio.sleep(max(0, conclui_em - time.time()))
+    lote = estado["expansoes"].get(lote_id)
+    if not lote or lote.get("status") != "em_obra":
+        return
+
+    # A obra ja aceita termina por temporizador mesmo que o Mestre encerre logo depois.
+    estado["trabalhadores"] = max(0, estado["trabalhadores"] - 1)
+    estado["em_obra"] = max(0, estado["em_obra"] - 1)
+    estado["concluidas"] += 1
+    estado["producao"] += GANHO_PRODUCAO
+    estado["expansoes"][lote_id] = {
+        "status": "concluida",
+        "por": nome,
+        "conclui_em": None,
+    }
+
+    # FATO gerado pelo temporizador: libera trabalhador e melhora a vila.
+    await sio.emit(
+        "construcao.concluida",
+        fato(
+            "construcao.iniciada (temporizador)",
+            por=nome,
+            lote=lote_id,
+            ganho_producao=GANHO_PRODUCAO,
+        ),
+    )
 
 
 @sio.on("lote.torrefacao_solicitada")
